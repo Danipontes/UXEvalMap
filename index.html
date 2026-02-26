@@ -3,574 +3,1802 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Avaliador UX/IHC — Profa. Dra. Danielle Pompeu — UEA</title>
+<title>Testes de Usabilidade — UX/IHC</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f11; --surface: #16161a; --surface2: #1e1e24; --border: #2a2a35;
-    --accent: #7c6af7; --accent2: #f7a26a; --accent3: #6af7c0; --accent4: #f76a8a;
-    --text: #e8e8f0; --muted: #7a7a9a; --green: #4ade80; --yellow: #facc15; --red: #f87171;
+    --bg: #0d0d0f;
+    --surface: #141416;
+    --surface2: #1c1c20;
+    --border: #2a2a30;
+    --accent1: #e8c547;
+    --accent2: #5e9ef7;
+    --accent3: #f76e6e;
+    --accent4: #6ef7c2;
+    --accent5: #d06ef7;
+    --text: #e8e8ec;
+    --muted: #7a7a8a;
   }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
-  header { padding: 3rem 2rem 2rem; text-align: center; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
-  header::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 600px; height: 200px; background: radial-gradient(ellipse, rgba(124,106,247,0.18) 0%, transparent 70%); pointer-events: none; }
-  header h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -0.02em; line-height: 1.1; }
-  header h1 span { color: var(--accent); font-style: italic; }
-  header p { margin-top: 0.75rem; color: var(--muted); font-size: 1rem; font-weight: 300; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-  .tabs { display: flex; overflow-x: auto; padding: 1.5rem 2rem 0; border-bottom: 1px solid var(--border); scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab { padding: 0.75rem 1.5rem; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 0.5rem; }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
-  .tab-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); opacity: 0.5; }
-  .tab.active .tab-dot { opacity: 1; }
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
 
-  main { max-width: 960px; margin: 0 auto; padding: 2rem; }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
 
-  .project-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2rem; }
-  .project-field { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; transition: border-color 0.2s; }
-  .project-field:focus-within { border-color: var(--accent); }
-  .project-field label { color: var(--muted); font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
-  .project-field input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.88rem; }
-  .project-field input::placeholder { color: #3a3a55; }
-  @media (max-width: 600px) { .project-bar { grid-template-columns: 1fr; } }
+  header {
+    padding: 5rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    text-align: center;
+  }
 
-  .section { display: none; }
-  .section.active { display: block; }
+  .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent1);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 
-  .framework-intro { background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; gap: 1.25rem; align-items: flex-start; }
-  .framework-intro .icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
-  .framework-intro h2 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin-bottom: 0.25rem; }
-  .framework-intro p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
-  .framework-intro .tag { display: inline-block; margin-top: 0.5rem; padding: 0.2rem 0.6rem; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 0.75rem; background: rgba(124,106,247,0.15); color: var(--accent); border: 1px solid rgba(124,106,247,0.3); }
+  .label::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: var(--accent1);
+  }
 
-  .criterion { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; transition: border-color 0.2s; }
-  .criterion:hover { border-color: var(--accent); }
-  .criterion-header { padding: 1rem 1.25rem; cursor: pointer; display: flex; align-items: flex-start; gap: 1rem; }
-  .criterion-num { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--accent); background: rgba(124,106,247,0.1); padding: 0.2rem 0.5rem; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
-  .criterion-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
-  .criterion-subtitle { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
-  .criterion-right { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
-  .criterion-score-preview { font-family: 'DM Mono', monospace; font-size: 0.75rem; padding: 0.15rem 0.45rem; border-radius: 4px; background: var(--surface2); color: var(--muted); }
-  .criterion-expand { color: var(--muted); font-size: 0.8rem; transition: transform 0.2s; }
-  .criterion.open .criterion-expand { transform: rotate(180deg); }
-  .criterion-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); }
-  .criterion.open .criterion-body { display: block; }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    font-weight: 400;
+    max-width: 700px;
+    text-align: center;
+    margin: 0 auto;
+  }
 
-  .rating-row { margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-  .rating-label { font-size: 0.82rem; color: var(--muted); }
-  .stars { display: flex; gap: 0.3rem; }
-  .star { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-family: 'DM Mono', monospace; color: var(--muted); transition: all 0.15s; user-select: none; }
-  .star:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.1); }
-  .star.sel-0 { background: var(--red); border-color: var(--red); color: white; }
-  .star.sel-1 { background: #f97316; border-color: #f97316; color: white; }
-  .star.sel-2 { background: var(--yellow); border-color: var(--yellow); color: #111; }
-  .star.sel-3 { background: #a3e635; border-color: #a3e635; color: #111; }
-  .star.sel-4 { background: var(--green); border-color: var(--green); color: #111; }
-  .na-btn { padding: 0.35rem 0.65rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 0.75rem; cursor: pointer; font-family: 'DM Mono', monospace; transition: all 0.15s; user-select: none; }
-  .na-btn.selected { background: var(--border); color: var(--text); }
-  .notes-area { margin-top: 0.75rem; width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.8rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; transition: border-color 0.2s; }
-  .notes-area:focus { border-color: var(--accent); }
-  .notes-area::placeholder { color: #3a3a55; }
+  .author-line {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent5);
+    margin-top: 1rem;
+    letter-spacing: 0.03em;
+  }
 
-  .examples { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
-  .example-pill { font-size: 0.78rem; padding: 0.2rem 0.6rem; border-radius: 20px; background: rgba(106,247,192,0.08); border: 1px solid rgba(106,247,192,0.2); color: var(--accent3); }
-  .bad-pill { background: rgba(247,106,138,0.08); border: 1px solid rgba(247,106,138,0.2); color: var(--accent4); }
+  h1 em {
+    font-style: italic;
+    color: var(--accent1);
+  }
 
-  .severity-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 0.82rem; }
-  .severity-legend span { color: var(--muted); }
-  .sev-item { display: flex; align-items: center; gap: 0.4rem; }
-  .sev-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    margin-top: 1.2rem;
+    max-width: 550px;
+    line-height: 1.7;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
-  .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
-  .score-card .label { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; }
-  .score-card .value { font-family: 'DM Serif Display', serif; font-size: 2.5rem; line-height: 1; }
-  .score-card .sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
-  .score-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 0.75rem; overflow: hidden; }
-  .score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+  .stats-bar {
+    display: flex;
+    gap: 3rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    justify-content: center;
+  }
 
-  .report-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-  .report-section h3 { font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-  .report-item { padding: 0.6rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; font-size: 0.88rem; }
-  .report-item:last-child { border-bottom: none; }
-  .report-item .name { color: var(--muted); }
-  .badge { padding: 0.15rem 0.5rem; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 0.75rem; white-space: nowrap; }
-  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
-  .badge-yellow { background: rgba(250,204,21,0.15); color: var(--yellow); }
-  .badge-green { background: rgba(74,222,128,0.15); color: var(--green); }
-  .badge-gray { background: rgba(122,122,154,0.15); color: var(--muted); }
+  .stat span {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 2rem;
+    color: var(--accent2);
+    font-weight: 500;
+  }
 
-  .info-box { padding: 0.75rem 1rem; background: rgba(124,106,247,0.08); border: 1px solid rgba(124,106,247,0.25); border-radius: 8px; font-size: 0.82rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
-  .info-box strong { color: var(--accent); }
+  .stat small {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
 
-  .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
-  .export-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; transition: opacity 0.2s; }
-  .export-btn:hover { opacity: 0.85; }
-  .btn-csv { background: #22c55e; color: white; }
-  .btn-txt { background: var(--accent); color: white; }
+  /* NAV PILLS */
+  .nav-section {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(13,13,15,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
 
-  .header-meta { margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.88rem; }
-  .meta-author { color: var(--accent3); font-weight: 500; }
-  .meta-sep { color: var(--border); }
-  .meta-inst { color: var(--muted); }
-  .disclaimer-ia { margin: 0.75rem auto 0; max-width: 600px; padding: 0.5rem 1rem; background: rgba(247,162,106,0.1); border: 1px solid rgba(247,162,106,0.3); border-radius: 8px; font-size: 0.78rem; color: var(--accent2); line-height: 1.5; }
+  .pill {
+    padding: 0.35rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    text-decoration: none;
+    display: inline-block;
+  }
 
-  .ref-box { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1rem 0 1.25rem; }
-  .ref-box h4 { font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .ref-box p { font-size: 0.82rem; color: var(--muted); line-height: 1.65; margin-bottom: 0.5rem; }
-  .ref-box p:last-child { margin-bottom: 0; }
-  .ref-cite { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: #5a5a7a; display: block; margin-top: 0.5rem; line-height: 1.5; }
+  .pill:hover, .pill.active { background: var(--accent1); border-color: var(--accent1); color: #000; }
 
-  footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; margin-top: 2rem; }
-  footer p { font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
-  footer a { color: var(--accent); text-decoration: none; }
-  footer .footer-disclaimer { margin-top: 0.75rem; font-size: 0.72rem; color: #5a5a7a; max-width: 700px; margin-left: auto; margin-right: auto; }
+  /* SECTION */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .section-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 0.3rem;
+    min-width: 2rem;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 0.4rem;
+    line-height: 1.6;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* GRID */
+  .grid {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .stats-bar { gap: 1.5rem; }
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    padding: 1.6rem;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover { background: var(--surface2); }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::after { opacity: 1; }
+
+  .card[data-cat="qualitativo"]::after { background: var(--accent2); }
+  .card[data-cat="quantitativo"]::after { background: var(--accent1); }
+  .card[data-cat="remoto"]::after { background: var(--accent4); }
+  .card[data-cat="neurociencia"]::after { background: var(--accent5); }
+  .card[data-cat="analitico"]::after { background: var(--accent3); }
+  .card[data-cat="acessibilidade"]::after { background: var(--accent2); }
+  .card[data-cat="expert"]::after { background: var(--accent3); }
+  .card[data-cat="continuo"]::after { background: var(--accent4); }
+
+  .card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    background: var(--surface2);
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  .chip {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .chip-q { background: rgba(94,158,247,0.15); color: var(--accent2); }
+  .chip-qn { background: rgba(232,197,71,0.15); color: var(--accent1); }
+  .chip-m { background: rgba(110,247,194,0.15); color: var(--accent4); }
+  .chip-x { background: rgba(247,110,110,0.15); color: var(--accent3); }
+
+  /* SPECIAL CARD */
+  .highlight-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-left: 3px solid var(--accent1);
+  }
+
+  .highlight-box h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 0.8rem;
+    color: var(--accent1);
+  }
+
+  .highlight-box ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .highlight-box li {
+    font-size: 13px;
+    color: var(--muted);
+    padding-left: 1.2rem;
+    position: relative;
+  }
+
+  .highlight-box li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent1);
+  }
+
+  footer {
+    padding: 3rem 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* REFERÊNCIAS ABNT */
+  .ref-list {
+    list-style: decimal;
+    padding-left: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .ref-list li {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.75;
+    padding-left: 0.4rem;
+    text-align: justify;
+  }
+
+  .ref-list li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .ref-list li em {
+    color: var(--accent2);
+    font-style: italic;
+  }
+
+  .ref-list li::marker {
+    color: var(--accent1);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+
+  /* animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  section { animation: fadeUp 0.5s ease both; }
+
+  /* CONSTRUCTION BANNER */
+  .banner-construction {
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(232,197,71,0.07),
+      rgba(232,197,71,0.07) 10px,
+      transparent 10px,
+      transparent 20px
+    );
+    border: 1px solid rgba(232,197,71,0.35);
+    border-radius: 8px;
+    padding: 0.75rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent1);
+    letter-spacing: 0.08em;
+  }
+
+  .banner-construction .icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* AI DISCLAIMER */
+  .banner-ai {
+    background: rgba(110,247,194,0.04);
+    border: 1px solid rgba(110,247,194,0.2);
+    border-radius: 8px;
+    padding: 0.75rem 1.2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .banner-ai .icon {
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--accent4);
+  }
+
+  .banner-ai strong { color: var(--accent4); }
+
+  /* CREDENTIALS */
+  .credentials {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    border-left: 3px solid var(--accent5);
+    margin-bottom: 2rem;
+  }
+
+  .credentials-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent5), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: #fff;
+    flex-shrink: 0;
+    font-style: italic;
+  }
+
+  .credentials-info { flex: 1; }
+
+  .credentials-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .credentials-title {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 0.2rem;
+  }
+
+  .credentials-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 0.25rem 0.6rem;
+    border-radius: 100px;
+    background: rgba(208,110,247,0.12);
+    color: var(--accent5);
+    border: 1px solid rgba(208,110,247,0.25);
+    white-space: nowrap;
+  }
+
+  .banners-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 1.8rem 0 0;
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Avaliador <span>UX / IHC</span></h1>
-  <p>Avaliação heurística científica · Nielsen · Bastien &amp; Scapin · WCAG 2.1 · Gestalt</p>
-  <div class="header-meta">
-    <span class="meta-author">👩‍🏫 Profa. Dra. Danielle Pompeu Noronha Pontes</span>
-    <span class="meta-sep">·</span>
-    <span class="meta-inst">Universidade do Estado do Amazonas — UEA</span>
-  </div>
-  <div class="disclaimer-ia">
-    🤖 Esta ferramenta foi desenvolvida com auxílio de Inteligência Artificial (Claude, Anthropic).
-    O conteúdo científico foi revisado e validado pela autora.
-  </div>
-</header>
+<div class="container">
 
-<div class="tabs">
-  <div class="tab active" onclick="showTab('nielsen',this)"><div class="tab-dot"></div>🎯 Nielsen</div>
-  <div class="tab" onclick="showTab('bastien',this)"><div class="tab-dot" style="background:var(--accent2)"></div>🔬 Bastien & Scapin</div>
-  <div class="tab" onclick="showTab('wcag',this)"><div class="tab-dot" style="background:var(--accent3)"></div>♿ WCAG</div>
-  <div class="tab" onclick="showTab('gestalt',this)"><div class="tab-dot" style="background:var(--accent4)"></div>👁️ Gestalt</div>
-  <div class="tab" onclick="showTab('dashboard',this)"><div class="tab-dot" style="background:#facc15"></div>📊 Resultado</div>
+  <header>
+
+    <h1>Testes de <em>Usabilidade</em><br>Mapa Completo</h1>
+    <p class="author-line">👩‍🏫 Profa. Dra. Danielle Pompeu Noronha Pontes · Universidade do Estado do Amazonas — UEA</p>
+    <p class="subtitle">Todos os métodos e técnicas de avaliação de usabilidade reconhecidos no âmbito científico e comercial, organizados por categoria e finalidade.</p>
+
+    <div class="stats-bar">
+      <div class="stat"><span>40+</span><small>Métodos</small></div>
+      <div class="stat"><span>8</span><small>Categorias</small></div>
+      <div class="stat"><span>55+</span><small>Referências</small></div>
+    </div>
+
+    <div class="banners-wrap">
+
+      <!-- Em construção -->
+      <div class="banner-construction">
+        <span class="icon">🚧</span>
+        <span>SITE EM FASE DE CONSTRUÇÃO — Conteúdo em revisão e expansão contínua. Algumas seções podem estar incompletas.</span>
+      </div>
+
+    </div>
+  </header>
+
+  <nav class="nav-section container">
+    <a class="pill active" href="#moderados">Moderados</a>
+    <a class="pill" href="#nao-moderados">Não-Moderados</a>
+    <a class="pill" href="#analiticos">Analíticos/Heurísticos</a>
+    <a class="pill" href="#quantitativos">Quantitativos</a>
+    <a class="pill" href="#neurociencia">Neurociência</a>
+    <a class="pill" href="#acessibilidade">Acessibilidade</a>
+    <a class="pill" href="#continuo">Contínuo / Analytics</a>
+    <a class="pill" href="#comparativo">Comparativo</a>
+    <a class="pill" href="#referencias">Referências ABNT</a>
+  </nav>
+
+  <!-- 1 -->
+  <section id="moderados">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent2)"></span>Testes Moderados</div>
+        <div class="section-desc">Conduzidos por um facilitador em tempo real. Permitem sondagem profunda, esclarecimento de dúvidas e observação comportamental rica. Padrão-ouro em pesquisa qualitativa.</div>
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card" data-cat="qualitativo">
+        <div class="card-tag" style="color:var(--accent2)">◆ Think-Aloud</div>
+        <h3>Think-Aloud Protocol (TAP)</h3>
+        <p>Participante verbaliza em tempo real o que pensa enquanto realiza tarefas. Desenvolvido por Ericsson & Simon (1980). Variante: Retrospective Think-Aloud (RTA).</p>
+        <div class="card-meta">
+          <span class="badge">Qualitativo</span>
+          <span class="badge">Lab</span>
+          <span class="badge">ISO 9241-11</span>
+        </div>
+      </div>
+      <div class="card" data-cat="qualitativo">
+        <div class="card-tag" style="color:var(--accent2)">◆ Entrevista</div>
+        <h3>Entrevista Contextual (Contextual Inquiry)</h3>
+        <p>Observação + entrevista no ambiente natural do usuário (modelo mestre-aprendiz de Beyer & Holtzblatt). Gera insights sobre contexto real de uso.</p>
+        <div class="card-meta">
+          <span class="badge">Qualitativo</span>
+          <span class="badge">Campo</span>
+          <span class="badge">CI</span>
+        </div>
+      </div>
+      <div class="card" data-cat="qualitativo">
+        <div class="card-tag" style="color:var(--accent2)">◆ Co-discovery</div>
+        <h3>Co-discovery / Paired Testing</h3>
+        <p>Dois participantes colaboram na realização de tarefas, verbalizando naturalmente. Reduz artificialidade do think-aloud solo. Usado em pesquisa de jogos e softwares colaborativos.</p>
+        <div class="card-meta">
+          <span class="badge">Qualitativo</span>
+          <span class="badge">Social</span>
+        </div>
+      </div>
+      <div class="card" data-cat="qualitativo">
+        <div class="card-tag" style="color:var(--accent2)">◆ Walkthrough</div>
+        <h3>Wizard of Oz Testing</h3>
+        <p>Simulação onde um humano opera o "sistema" nos bastidores enquanto o usuário acredita interagir com sistema real. Ideal para protótipos incompletos e IA conversacional.</p>
+        <div class="card-meta">
+          <span class="badge">Qualitativo</span>
+          <span class="badge">Protótipo</span>
+          <span class="badge">Exploratório</span>
+        </div>
+      </div>
+      <div class="card" data-cat="qualitativo">
+        <div class="card-tag" style="color:var(--accent2)">◆ Entrevista</div>
+        <h3>Entrevista Pós-Teste</h3>
+        <p>Entrevista semiestruturada conduzida após a sessão de tarefas. Captura percepções, frustrações e sugestões. Frequentemente combinada com escalas SUS e NPS.</p>
+        <div class="card-meta">
+          <span class="badge">Qualitativo</span>
+          <span class="badge">Complementar</span>
+        </div>
+      </div>
+      <div class="card" data-cat="qualitativo">
+        <div class="card-tag" style="color:var(--accent2)">◆ Grupo</div>
+        <h3>Focus Group de Usabilidade</h3>
+        <p>Discussão em grupo sobre experiência com produto. Menos eficaz que teste individual para identificar problemas de usabilidade, mas útil para percepção e atitudes.</p>
+        <div class="card-meta">
+          <span class="badge">Qualitativo</span>
+          <span class="badge">Grupo</span>
+          <span class="badge">Atitudinal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / ISBN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Think-Aloud Protocol (TAP)</strong></td>
+            <td>Ericsson, K. A. & Simon, H. A.</td>
+            <td><em>Protocol Analysis: Verbal Reports as Data</em> — MIT Press</td>
+            <td>1980 / rev. 1993</td>
+            <td>ISBN 0-262-55010-2</td>
+          </tr>
+          <tr>
+            <td><strong>Retrospective Think-Aloud</strong></td>
+            <td>van den Haak, M. J. et al.</td>
+            <td><em>Behaviour & Information Technology</em>, 22(5)</td>
+            <td>2003</td>
+            <td>10.1080/0144929031000205</td>
+          </tr>
+          <tr>
+            <td><strong>Contextual Inquiry</strong></td>
+            <td>Beyer, H. & Holtzblatt, K.</td>
+            <td><em>Contextual Design</em> — Morgan Kaufmann</td>
+            <td>1998</td>
+            <td>ISBN 1-55860-411-1</td>
+          </tr>
+          <tr>
+            <td><strong>Co-discovery / Paired Testing</strong></td>
+            <td>Kennedy, S.</td>
+            <td><em>CHI Conference Companion</em> — ACM</td>
+            <td>1989</td>
+            <td>10.1145/1165385.1165394</td>
+          </tr>
+          <tr>
+            <td><strong>Wizard of Oz Testing</strong></td>
+            <td>Maulsby, D. et al.</td>
+            <td><em>Proc. ACM CHI '93</em> — ACM Press</td>
+            <td>1993</td>
+            <td>10.1145/259963.260328</td>
+          </tr>
+          <tr>
+            <td><strong>Focus Group em UX</strong></td>
+            <td>Nielsen, J.</td>
+            <td><em>Usability Engineering</em> — Academic Press</td>
+            <td>1993</td>
+            <td>ISBN 0-12-518406-9</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="nao-moderados">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent4)"></span>Testes Não-Moderados & Remotos</div>
+        <div class="section-desc">Executados sem facilitador, geralmente online. Escalam facilmente, atingem amostras maiores e permitem acesso a usuários globais. Plataformas: UserTesting, Maze, Lookback, Optimal Workshop.</div>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card" data-cat="remoto">
+        <div class="card-tag" style="color:var(--accent4)">◆ Remoto</div>
+        <h3>Teste Remoto Não-Moderado</h3>
+        <p>Participantes realizam tarefas predefinidas em seus próprios dispositivos. Sistema registra ações, tempos e vídeo. Rápido e escalável.</p>
+        <div class="card-meta"><span class="badge">Remoto</span><span class="badge">UserTesting</span></div>
+      </div>
+      <div class="card" data-cat="remoto">
+        <div class="card-tag" style="color:var(--accent4)">◆ Remoto</div>
+        <h3>Teste Remoto Moderado</h3>
+        <p>Sessão conduzida via videoconferência (Zoom, Teams). Mantém riqueza da moderação com flexibilidade geográfica. Muito adotado pós-pandemia.</p>
+        <div class="card-meta"><span class="badge">Remoto</span><span class="badge">Qualitativo</span></div>
+      </div>
+      <div class="card" data-cat="remoto">
+        <div class="card-tag" style="color:var(--accent4)">◆ Primeira Impressão</div>
+        <h3>Five-Second Test</h3>
+        <p>Usuário vê uma tela por 5 segundos e depois responde perguntas sobre o que lembrou. Avalia clareza de layout, hierarquia visual e primeira impressão.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">Rápido</span></div>
+      </div>
+      <div class="card" data-cat="remoto">
+        <div class="card-tag" style="color:var(--accent4)">◆ Navegação</div>
+        <h3>Tree Testing</h3>
+        <p>Avalia arquitetura de informação pedindo ao usuário para encontrar itens na estrutura textual (árvore) sem interferência visual. Identifica problemas de IA.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">IA</span><span class="badge">Optimal Workshop</span></div>
+      </div>
+      <div class="card" data-cat="remoto">
+        <div class="card-tag" style="color:var(--accent4)">◆ Navegação</div>
+        <h3>Card Sorting</h3>
+        <p>Usuários agrupam cartões de conteúdo em categorias. Aberto (define categorias) ou fechado (categorias predefinidas). Fundamental para organizar menus e navegação.</p>
+        <div class="card-meta"><span class="badge">Misto</span><span class="badge">IA</span></div>
+      </div>
+      <div class="card" data-cat="remoto">
+        <div class="card-tag" style="color:var(--accent4)">◆ Clique</div>
+        <h3>First Click Test</h3>
+        <p>Registra o primeiro clique do usuário ao tentar completar uma tarefa. Pesquisa de Tullis e Albert mostra que o primeiro clique correto prediz 87% de sucesso na tarefa.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">Navegação</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / ISBN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Teste Remoto Não-Moderado</strong></td>
+            <td>Brush, A. J. et al.</td>
+            <td><em>Proc. ACM CHI 2004</em> — ACM Press</td>
+            <td>2004</td>
+            <td>10.1145/985692.985768</td>
+          </tr>
+          <tr>
+            <td><strong>Five-Second Test</strong></td>
+            <td>Perfetti, C. & Landesman, L.</td>
+            <td><em>UIE Brain Sparks / User Interface Engineering</em></td>
+            <td>2001</td>
+            <td>uie.com/articles/five_second_test</td>
+          </tr>
+          <tr>
+            <td><strong>Tree Testing</strong></td>
+            <td>Cooke, L.</td>
+            <td><em>IEEE Transactions on Professional Communication</em>, 53(2)</td>
+            <td>2010</td>
+            <td>10.1109/TPC.2010.2046100</td>
+          </tr>
+          <tr>
+            <td><strong>Card Sorting (aberto/fechado)</strong></td>
+            <td>Spencer, D.</td>
+            <td><em>Card Sorting: Designing Usable Categories</em> — Rosenfeld Media</td>
+            <td>2009</td>
+            <td>ISBN 978-1-933820-02-6</td>
+          </tr>
+          <tr>
+            <td><strong>First Click Testing</strong></td>
+            <td>Tullis, T. & Albert, W.</td>
+            <td><em>Measuring the User Experience</em> — Morgan Kaufmann</td>
+            <td>2013</td>
+            <td>ISBN 978-0-12-415781-1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="analiticos">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent3)"></span>Métodos Analíticos & Inspeção por Especialistas</div>
+        <div class="section-desc">Avaliações conduzidas por experts sem a participação direta de usuários. Rápidos, baratos e úteis em fases iniciais de design. Fundamentados em heurísticas e modelos cognitivos.</div>
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card" data-cat="expert">
+        <div class="card-tag" style="color:var(--accent3)">◆ Heurística</div>
+        <h3>Avaliação Heurística (Nielsen & Molich, 1990)</h3>
+        <p>3-5 especialistas inspecionam a interface contra as 10 heurísticas de Nielsen. Encontra ~75% dos problemas de usabilidade. Método mais usado em inspeção de usabilidade.</p>
+        <div class="card-meta"><span class="badge">Expert</span><span class="badge">Inspeção</span><span class="badge">ISO 9241</span></div>
+      </div>
+      <div class="card" data-cat="expert">
+        <div class="card-tag" style="color:var(--accent3)">◆ Cognitivo</div>
+        <h3>Cognitive Walkthrough</h3>
+        <p>Especialistas simulam o processo cognitivo do usuário ao executar tarefas passo a passo, verificando se cada ação é intuitiva. Foco em facilidade de aprendizado.</p>
+        <div class="card-meta"><span class="badge">Expert</span><span class="badge">Cognição</span></div>
+      </div>
+      <div class="card" data-cat="expert">
+        <div class="card-tag" style="color:var(--accent3)">◆ Pluralístico</div>
+        <h3>Pluralistic Walkthrough</h3>
+        <p>Desenvolvedores, especialistas em usabilidade e usuários percorrem cenários juntos, discutindo cada passo. Variante colaborativa do Cognitive Walkthrough (Bias, 1994).</p>
+        <div class="card-meta"><span class="badge">Colaborativo</span><span class="badge">Multidisciplinar</span></div>
+      </div>
+      <div class="card" data-cat="expert">
+        <div class="card-tag" style="color:var(--accent3)">◆ Perspectiva</div>
+        <h3>Perspective-Based Inspection</h3>
+        <p>Inspeção feita sob perspectivas distintas (novato, especialista, usuário com deficiência). Cada avaliador usa um "papel" diferente para cobrir mais ângulos de uso.</p>
+        <div class="card-meta"><span class="badge">Expert</span><span class="badge">Papéis</span></div>
+      </div>
+      <div class="card" data-cat="expert">
+        <div class="card-tag" style="color:var(--accent3)">◆ Modelo</div>
+        <h3>GOMS / KLM (Card et al., 1983)</h3>
+        <p>Modelos preditivos de tempo de execução (Goals, Operators, Methods, Selection). KLM estima tempo de tarefas via teclado/mouse sem usuários reais. Muito usado em aviação e sistemas críticos.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">Preditivo</span><span class="badge">Científico</span></div>
+      </div>
+      <div class="card" data-cat="expert">
+        <div class="card-tag" style="color:var(--accent3)">◆ Heurística</div>
+        <h3>Heurísticas de Shneiderman (8 Regras de Ouro)</h3>
+        <p>Alternativa às heurísticas de Nielsen, com ênfase em consistência, atalhos, feedback informativo e reversão de ações. Amplamente usadas em IHC acadêmica.</p>
+        <div class="card-meta"><span class="badge">Expert</span><span class="badge">Inspeção</span></div>
+      </div>
+    </div>
+    <div class="highlight-box">
+      <h3>Outros Checklists & Frameworks de Inspeção</h3>
+      <ul>
+        <li>Ergolist (Labiutil/UFSC) — adaptado ao contexto brasileiro</li>
+        <li>WCAG Audit — inspeção de acessibilidade</li>
+        <li>Nielsen Norman UX Benchmark Heuristics</li>
+        <li>Gestalt Principles Inspection</li>
+        <li>Action Analysis (Kieras & Polson)</li>
+        <li>Feature Inspection (Karat et al.)</li>
+        <li>Consistency Inspection</li>
+        <li>Formal Usability Inspection (FUI)</li>
+        <li>Standards Inspection (ISO, ANSI)</li>
+        <li>MoLIC Inspection (IHC brasileiro)</li>
+      </ul>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / ISBN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Avaliação Heurística</strong></td>
+            <td>Nielsen, J. & Molich, R.</td>
+            <td><em>Proc. ACM CHI 1990</em> — ACM Press</td>
+            <td>1990</td>
+            <td>10.1145/97243.97281</td>
+          </tr>
+          <tr>
+            <td><strong>10 Heurísticas de Nielsen</strong></td>
+            <td>Nielsen, J.</td>
+            <td><em>Usability Engineering</em> — Academic Press / Morgan Kaufmann</td>
+            <td>1994</td>
+            <td>ISBN 0-12-518406-9</td>
+          </tr>
+          <tr>
+            <td><strong>Cognitive Walkthrough</strong></td>
+            <td>Lewis, C. et al.</td>
+            <td><em>Proc. ACM CHI 1990</em> — ACM Press</td>
+            <td>1990</td>
+            <td>10.1145/97243.97279</td>
+          </tr>
+          <tr>
+            <td><strong>Pluralistic Walkthrough</strong></td>
+            <td>Bias, R. G.</td>
+            <td><em>Usability Inspection Methods</em> — Wiley</td>
+            <td>1994</td>
+            <td>ISBN 0-471-01877-5</td>
+          </tr>
+          <tr>
+            <td><strong>GOMS / KLM</strong></td>
+            <td>Card, S. K., Moran, T. P. & Newell, A.</td>
+            <td><em>The Psychology of Human-Computer Interaction</em> — LEA</td>
+            <td>1983</td>
+            <td>ISBN 0-89859-234-7</td>
+          </tr>
+          <tr>
+            <td><strong>8 Regras de Ouro (Shneiderman)</strong></td>
+            <td>Shneiderman, B.</td>
+            <td><em>Designing the User Interface</em> — Addison-Wesley</td>
+            <td>1987</td>
+            <td>ISBN 0-201-16505-8</td>
+          </tr>
+          <tr>
+            <td><strong>Ergolist</strong></td>
+            <td>Labiutil / Cybis, W. et al.</td>
+            <td><em>Ergonomia e Usabilidade</em> — Novatec</td>
+            <td>2007</td>
+            <td>ISBN 978-85-7522-143-6</td>
+          </tr>
+          <tr>
+            <td><strong>Feature Inspection</strong></td>
+            <td>Karat, C. M. et al.</td>
+            <td><em>Usability Inspection Methods</em> — Wiley</td>
+            <td>1994</td>
+            <td>ISBN 0-471-01877-5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  <!-- 4 -->
+  <section id="quantitativos">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent1)"></span>Métricas & Escalas Quantitativas</div>
+        <div class="section-desc">Instrumentos validados para medir percepção de usabilidade, satisfação e experiência. Permitem benchmarking, comparação entre versões e comunicação com stakeholders.</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Escala / Métricas</th>
+            <th>Foco</th>
+            <th>Itens</th>
+            <th>Tipo</th>
+            <th>Origem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SUS — System Usability Scale</strong></td>
+            <td>Usabilidade geral</td>
+            <td>10 itens</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Brooke, 1986</td>
+          </tr>
+          <tr>
+            <td><strong>SUPR-Q</strong></td>
+            <td>Usabilidade de websites</td>
+            <td>8 itens</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Sauro, 2015</td>
+          </tr>
+          <tr>
+            <td><strong>UMUX / UMUX-LITE</strong></td>
+            <td>Usabilidade percebida</td>
+            <td>4/2 itens</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Finstad, 2010</td>
+          </tr>
+          <tr>
+            <td><strong>UEQ — User Experience Questionnaire</strong></td>
+            <td>UX multidimensional</td>
+            <td>26 itens</td>
+            <td><span class="chip chip-m">Misto</span></td>
+            <td>Laugwitz et al., 2008</td>
+          </tr>
+          <tr>
+            <td><strong>AttrakDiff</strong></td>
+            <td>Qualidade pragmática + hedônica</td>
+            <td>28 pares</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Hassenzahl et al., 2003</td>
+          </tr>
+          <tr>
+            <td><strong>NASA-TLX</strong></td>
+            <td>Carga cognitiva (workload)</td>
+            <td>6 dimensões</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Hart & Staveland, 1988</td>
+          </tr>
+          <tr>
+            <td><strong>NPS — Net Promoter Score</strong></td>
+            <td>Lealdade / satisfação</td>
+            <td>1-2 perguntas</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Reichheld, 2003</td>
+          </tr>
+          <tr>
+            <td><strong>CSAT — Customer Satisfaction</strong></td>
+            <td>Satisfação pontual</td>
+            <td>1 pergunta</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Comercial</td>
+          </tr>
+          <tr>
+            <td><strong>QUIS — Questionnaire for UI Satisfaction</strong></td>
+            <td>Satisfação com UI</td>
+            <td>27-73 itens</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Chin et al., 1988</td>
+          </tr>
+          <tr>
+            <td><strong>PSSUQ — Post-Study System Usability</strong></td>
+            <td>Usabilidade pós-tarefa</td>
+            <td>16 itens</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Lewis, 1992 (IBM)</td>
+          </tr>
+          <tr>
+            <td><strong>ASQ — After-Scenario Questionnaire</strong></td>
+            <td>Por tarefa</td>
+            <td>3 itens</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Lewis, 1991</td>
+          </tr>
+          <tr>
+            <td><strong>Métricas HEART (Google)</strong></td>
+            <td>Happiness, Engagement, Adoption, Retention, Task Success</td>
+            <td>Framework</td>
+            <td><span class="chip chip-m">Misto</span></td>
+            <td>Google, 2010</td>
+          </tr>
+          <tr>
+            <td><strong>Task Time / Error Rate / Success Rate</strong></td>
+            <td>Eficiência e eficácia</td>
+            <td>Observacional</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>ISO 9241-11</td>
+          </tr>
+          <tr>
+            <td><strong>SEQ — Single Ease Question</strong></td>
+            <td>Facilidade percebida por tarefa</td>
+            <td>1 item (1-7)</td>
+            <td><span class="chip chip-qn">Quantitativo</span></td>
+            <td>Sauro & Dumas, 2009</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Escala</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / ISBN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SUS</strong></td>
+            <td>Brooke, J.</td>
+            <td><em>Usability Evaluation in Industry</em> — Taylor & Francis</td>
+            <td>1996</td>
+            <td>ISBN 0-7484-0695-7</td>
+          </tr>
+          <tr>
+            <td><strong>SUS — interpretação adjunto</strong></td>
+            <td>Bangor, A. et al.</td>
+            <td><em>International Journal of Human-Computer Interaction</em>, 24(6)</td>
+            <td>2008</td>
+            <td>10.1080/10447310802205776</td>
+          </tr>
+          <tr>
+            <td><strong>SUPR-Q</strong></td>
+            <td>Sauro, J.</td>
+            <td><em>SUPR-Q: A Comprehensive Measure of Web Usability</em> — MeasuringU</td>
+            <td>2015</td>
+            <td>measuringu.com/suprq</td>
+          </tr>
+          <tr>
+            <td><strong>UMUX / UMUX-LITE</strong></td>
+            <td>Finstad, K.</td>
+            <td><em>Interacting with Computers</em>, 22(5)</td>
+            <td>2010</td>
+            <td>10.1016/j.intcom.2010.04.004</td>
+          </tr>
+          <tr>
+            <td><strong>UEQ</strong></td>
+            <td>Laugwitz, B. et al.</td>
+            <td><em>Proc. HCI & Usability for Education</em> — Springer LNCS 5298</td>
+            <td>2008</td>
+            <td>10.1007/978-3-540-89350-9_6</td>
+          </tr>
+          <tr>
+            <td><strong>AttrakDiff</strong></td>
+            <td>Hassenzahl, M. et al.</td>
+            <td><em>Proc. Mensch & Computer 2003</em> — Springer</td>
+            <td>2003</td>
+            <td>10.1007/978-3-322-80058-9_19</td>
+          </tr>
+          <tr>
+            <td><strong>NASA-TLX</strong></td>
+            <td>Hart, S. G. & Staveland, L. E.</td>
+            <td><em>Advances in Psychology</em>, vol. 52 — Elsevier</td>
+            <td>1988</td>
+            <td>10.1016/S0166-4115(08)62386-9</td>
+          </tr>
+          <tr>
+            <td><strong>QUIS</strong></td>
+            <td>Chin, J. P. et al.</td>
+            <td><em>Proc. ACM CHI 1988</em> — ACM Press</td>
+            <td>1988</td>
+            <td>10.1145/57167.57203</td>
+          </tr>
+          <tr>
+            <td><strong>PSSUQ</strong></td>
+            <td>Lewis, J. R.</td>
+            <td><em>International Journal of Human-Computer Interaction</em>, 7(1)</td>
+            <td>1995</td>
+            <td>10.1080/10447319509526115</td>
+          </tr>
+          <tr>
+            <td><strong>ASQ</strong></td>
+            <td>Lewis, J. R.</td>
+            <td><em>International Journal of Human-Computer Interaction</em>, 3(1)</td>
+            <td>1991</td>
+            <td>10.1080/10447319109526087</td>
+          </tr>
+          <tr>
+            <td><strong>NPS</strong></td>
+            <td>Reichheld, F. F.</td>
+            <td><em>Harvard Business Review</em>, Dec. 2003</td>
+            <td>2003</td>
+            <td>hbr.org/2003/12/the-one-number-you-need-to-grow</td>
+          </tr>
+          <tr>
+            <td><strong>HEART Framework</strong></td>
+            <td>Rodden, K. et al.</td>
+            <td><em>Proc. ACM CHI 2010</em> — ACM Press</td>
+            <td>2010</td>
+            <td>10.1145/1753326.1753687</td>
+          </tr>
+          <tr>
+            <td><strong>SEQ</strong></td>
+            <td>Sauro, J. & Dumas, J. S.</td>
+            <td><em>Proc. ACM CHI 2009</em> — ACM Press</td>
+            <td>2009</td>
+            <td>10.1145/1518701.1518946</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="neurociencia">
+    <div class="section-header">
+      <div class="section-number">05</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent5)"></span>Neurociência & Psicofisiologia (Neuro-UX)</div>
+        <div class="section-desc">Métodos biométricos que capturam respostas inconscientes e automáticas do usuário. Crescente no âmbito científico e aplicações de alta fidelidade.</div>
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card" data-cat="neurociencia">
+        <div class="card-tag" style="color:var(--accent5)">◆ Ocular</div>
+        <h3>Eye Tracking</h3>
+        <p>Rastreia movimentos oculares (fixações, sacadas, mapa de calor). Revela o que o usuário foca, onde lê e o que ignora. Equipamentos: Tobii, SMI, The Eye Tribe.</p>
+        <div class="card-meta"><span class="badge">Biométrico</span><span class="badge">Quantitativo</span><span class="badge">Lab/Remoto</span></div>
+      </div>
+      <div class="card" data-cat="neurociencia">
+        <div class="card-tag" style="color:var(--accent5)">◆ Emocional</div>
+        <h3>GSR / EDA — Condutância da Pele</h3>
+        <p>Mede arousal emocional via resposta galvânica da pele. Identifica momentos de frustração, surpresa ou engajamento. Combinado com eye tracking em estudos de UX emocional.</p>
+        <div class="card-meta"><span class="badge">Biométrico</span><span class="badge">Emocional</span></div>
+      </div>
+      <div class="card" data-cat="neurociencia">
+        <div class="card-tag" style="color:var(--accent5)">◆ Cerebral</div>
+        <h3>EEG — Eletroencefalografia</h3>
+        <p>Mede atividade elétrica cerebral em tempo real. Indicadores de carga cognitiva, engajamento e emoção. Usado em pesquisas de jogos, publicidade e UX de alta complexidade.</p>
+        <div class="card-meta"><span class="badge">Biométrico</span><span class="badge">Científico</span><span class="badge">Carga Cognitiva</span></div>
+      </div>
+      <div class="card" data-cat="neurociencia">
+        <div class="card-tag" style="color:var(--accent5)">◆ Expressão</div>
+        <h3>Facial Action Coding System (FACS)</h3>
+        <p>Análise de microexpressões faciais por câmera para inferir emoções. Sistemas comerciais: Affectiva, iMotions. Revela frustração, surpresa e satisfação não relatadas.</p>
+        <div class="card-meta"><span class="badge">Emocional</span><span class="badge">IA</span></div>
+      </div>
+      <div class="card" data-cat="neurociencia">
+        <div class="card-tag" style="color:var(--accent5)">◆ Cardiovascular</div>
+        <h3>HRV / PPG — Frequência Cardíaca</h3>
+        <p>Variabilidade da frequência cardíaca como proxy de estresse e carga cognitiva. Dispositivos wearables e câmeras remotas (rPPG) tornam-no cada vez mais viável.</p>
+        <div class="card-meta"><span class="badge">Biométrico</span><span class="badge">Estresse</span></div>
+      </div>
+      <div class="card" data-cat="neurociencia">
+        <div class="card-tag" style="color:var(--accent5)">◆ fMRI</div>
+        <h3>fMRI em UX (Consumer Neuroscience)</h3>
+        <p>Ressonância magnética funcional para mapeamento cerebral durante interação. Altíssimo custo, restrito ao científico. Usado por Nielsen Norman Group em estudos pontuais.</p>
+        <div class="card-meta"><span class="badge">Científico</span><span class="badge">Alto Custo</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / ISBN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Eye Tracking em UX</strong></td>
+            <td>Nielsen, J. & Pernice, K.</td>
+            <td><em>Eyetracking Web Usability</em> — New Riders</td>
+            <td>2010</td>
+            <td>ISBN 978-0-321-49836-5</td>
+          </tr>
+          <tr>
+            <td><strong>Eye Tracking — fixações e sacadas</strong></td>
+            <td>Rayner, K.</td>
+            <td><em>Psychological Bulletin</em>, 124(3)</td>
+            <td>1998</td>
+            <td>10.1037/0033-2909.124.3.372</td>
+          </tr>
+          <tr>
+            <td><strong>GSR / EDA em UX</strong></td>
+            <td>Mandryk, R. L. & Atkins, M. S.</td>
+            <td><em>Proc. ACM CHI 2007</em> — ACM Press</td>
+            <td>2007</td>
+            <td>10.1145/1240624.1240688</td>
+          </tr>
+          <tr>
+            <td><strong>EEG — carga cognitiva</strong></td>
+            <td>Fairclough, S. H.</td>
+            <td><em>Applied Ergonomics</em>, 40(3)</td>
+            <td>2009</td>
+            <td>10.1016/j.apergo.2008.06.011</td>
+          </tr>
+          <tr>
+            <td><strong>FACS / Reconhecimento Facial</strong></td>
+            <td>Ekman, P. & Friesen, W. V.</td>
+            <td><em>Facial Action Coding System</em> — Consulting Psychologists Press</td>
+            <td>1978</td>
+            <td>ISBN 0-931136-02-8</td>
+          </tr>
+          <tr>
+            <td><strong>Neuro-UX — revisão integrativa</strong></td>
+            <td>Dimoka, A. et al.</td>
+            <td><em>MIS Quarterly</em>, 36(3)</td>
+            <td>2012</td>
+            <td>10.2307/41703475</td>
+          </tr>
+          <tr>
+            <td><strong>fMRI em Consumer Neuroscience</strong></td>
+            <td>Kenning, P. H. & Plassmann, H.</td>
+            <td><em>Journal of Consumer Behaviour</em>, 7(4-5)</td>
+            <td>2008</td>
+            <td>10.1002/cb.257</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="acessibilidade">
+    <div class="section-header">
+      <div class="section-number">06</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent2)"></span>Testes de Acessibilidade</div>
+        <div class="section-desc">Avaliação específica para garantir usabilidade por pessoas com deficiências visuais, motoras, auditivas e cognitivas. Obrigatório em muitos países (LGPD, ADA, eMAG).</div>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card" data-cat="acessibilidade">
+        <div class="card-tag" style="color:var(--accent2)">◆ Conformidade</div>
+        <h3>Auditoria WCAG (A/AA/AAA)</h3>
+        <p>Verificação de conformidade com Web Content Accessibility Guidelines. Manual e automatizada. Ferramentas: axe, WAVE, Lighthouse, Deque.</p>
+        <div class="card-meta"><span class="badge">WCAG 2.2</span><span class="badge">Automático/Manual</span></div>
+      </div>
+      <div class="card" data-cat="acessibilidade">
+        <div class="card-tag" style="color:var(--accent2)">◆ Leitor</div>
+        <h3>Screen Reader Testing</h3>
+        <p>Teste com NVDA, JAWS, VoiceOver e TalkBack por usuários cegos ou especialistas. Avalia semântica HTML, ordem de foco e compatibilidade com tecnologia assistiva.</p>
+        <div class="card-meta"><span class="badge">NVDA</span><span class="badge">VoiceOver</span></div>
+      </div>
+      <div class="card" data-cat="acessibilidade">
+        <div class="card-tag" style="color:var(--accent2)">◆ Inclusivo</div>
+        <h3>Teste com Usuários com Deficiência</h3>
+        <p>Teste de usabilidade tradicional com recrutamento específico de PcD. Padrão para validação real de acessibilidade. Exige facilitadores treinados e ambiente adaptado.</p>
+        <div class="card-meta"><span class="badge">Qualitativo</span><span class="badge">Inclusivo</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Método / Norma</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / Identificador</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>WCAG 2.2</strong></td>
+            <td>W3C / WAI</td>
+            <td><em>Web Content Accessibility Guidelines 2.2</em> — W3C Recommendation</td>
+            <td>2023</td>
+            <td>w3.org/TR/WCAG22</td>
+          </tr>
+          <tr>
+            <td><strong>Screen Reader Testing</strong></td>
+            <td>Lazar, J. et al.</td>
+            <td><em>Research Methods in Human-Computer Interaction</em> — Wiley</td>
+            <td>2010</td>
+            <td>ISBN 978-0-470-72337-1</td>
+          </tr>
+          <tr>
+            <td><strong>Teste com PcD</strong></td>
+            <td>Henry, S. L.</td>
+            <td><em>Just Ask: Integrating Accessibility Throughout Design</em> — Lulu Press</td>
+            <td>2007</td>
+            <td>ISBN 978-1-4303-1640-7</td>
+          </tr>
+          <tr>
+            <td><strong>eMAG — Modelo de Acessibilidade Governo BR</strong></td>
+            <td>Governo Federal Brasileiro / SLTI</td>
+            <td><em>eMAG 3.1</em> — Ministério do Planejamento</td>
+            <td>2014</td>
+            <td>emag.governoeletronico.gov.br</td>
+          </tr>
+          <tr>
+            <td><strong>Norma ISO 9241-171</strong></td>
+            <td>ISO / IEC</td>
+            <td><em>ISO 9241-171:2008 — Guidance on Software Accessibility</em></td>
+            <td>2008</td>
+            <td>iso.org/standard/39080.html</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="continuo">
+    <div class="section-header">
+      <div class="section-number">07</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent4)"></span>Pesquisa Contínua & Analytics Comportamental</div>
+        <div class="section-desc">Métodos passivos e contínuos que coletam dados em produção com usuários reais. Fundamentais para produtos digitais em escala. Complementam estudos moderados.</div>
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card" data-cat="continuo">
+        <div class="card-tag" style="color:var(--accent4)">◆ Comportamento</div>
+        <h3>Heatmaps & Session Recording</h3>
+        <p>Mapas de calor de cliques, scroll e hover. Gravações de sessões reais. Ferramentas: Hotjar, Microsoft Clarity, FullStory, Heap. Identifica padrões e anomalias.</p>
+        <div class="card-meta"><span class="badge">Passivo</span><span class="badge">Escala</span><span class="badge">Quantitativo</span></div>
+      </div>
+      <div class="card" data-cat="continuo">
+        <div class="card-tag" style="color:var(--accent4)">◆ Funil</div>
+        <h3>Análise de Funil & Fluxo</h3>
+        <p>Rastreia abandono em etapas de fluxo (onboarding, checkout, cadastro). Ferramentas: Mixpanel, Amplitude, GA4. Identifica gargalos de conversão.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">Produto</span></div>
+      </div>
+      <div class="card" data-cat="continuo">
+        <div class="card-tag" style="color:var(--accent4)">◆ Experimental</div>
+        <h3>A/B Testing (Teste Controlado)</h3>
+        <p>Experimento randomizado com variantes de design. Mede impacto causal em métricas de negócio. Plataformas: Optimizely, VWO, LaunchDarkly. Requer amostra estatisticamente significativa.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">Experimental</span><span class="badge">Causal</span></div>
+      </div>
+      <div class="card" data-cat="continuo">
+        <div class="card-tag" style="color:var(--accent4)">◆ Experimental</div>
+        <h3>Multivariate Testing (MVT)</h3>
+        <p>Variante do A/B que testa múltiplos elementos simultaneamente. Requer tráfego muito alto. Revela interações entre componentes de design.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">Escala</span></div>
+      </div>
+      <div class="card" data-cat="continuo">
+        <div class="card-tag" style="color:var(--accent4)">◆ Feedback</div>
+        <h3>Interceptação In-App / Micro-surveys</h3>
+        <p>Questionários curtos disparados no momento exato de uso. Capturam contexto in-the-moment. Ex: Intercom, Qualtrics, Survicate. Combinam NPS, SUS-1 ou perguntas abertas.</p>
+        <div class="card-meta"><span class="badge">Misto</span><span class="badge">Contínuo</span></div>
+      </div>
+      <div class="card" data-cat="continuo">
+        <div class="card-tag" style="color:var(--accent4)">◆ Diário</div>
+        <h3>Diary Study (Estudo de Diário)</h3>
+        <p>Participantes registram experiências ao longo de dias ou semanas. Captura uso longitudinal e mudança de comportamento. Ideal para produtos de uso recorrente.</p>
+        <div class="card-meta"><span class="badge">Qualitativo</span><span class="badge">Longitudinal</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / ISBN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>A/B Testing — fundamentos</strong></td>
+            <td>Kohavi, R. et al.</td>
+            <td><em>Proc. ACM KDD 2007</em> — ACM Press</td>
+            <td>2007</td>
+            <td>10.1145/1281192.1281295</td>
+          </tr>
+          <tr>
+            <td><strong>A/B Testing — guia prático</strong></td>
+            <td>Kohavi, R., Tang, D. & Xu, Y.</td>
+            <td><em>Trustworthy Online Controlled Experiments</em> — Cambridge UP</td>
+            <td>2020</td>
+            <td>ISBN 978-1-108-72426-5</td>
+          </tr>
+          <tr>
+            <td><strong>Heatmaps — revisão e validade</strong></td>
+            <td>Bojko, A.</td>
+            <td><em>Eye Tracking the User Experience</em> — Rosenfeld Media</td>
+            <td>2013</td>
+            <td>ISBN 978-1-933820-14-9</td>
+          </tr>
+          <tr>
+            <td><strong>Diary Study</strong></td>
+            <td>Carter, S. & Mankoff, J.</td>
+            <td><em>Proc. ACM CHI 2005</em> — ACM Press</td>
+            <td>2005</td>
+            <td>10.1145/1054972.1055055</td>
+          </tr>
+          <tr>
+            <td><strong>Experience Sampling Method (ESM)</strong></td>
+            <td>Csikszentmihalyi, M. & Larson, R.</td>
+            <td><em>Journal of Nervous and Mental Disease</em>, 175(9)</td>
+            <td>1987</td>
+            <td>10.1097/00005053-198709000-00004</td>
+          </tr>
+          <tr>
+            <td><strong>Analytics & UX — métricas produto</strong></td>
+            <td>Sauro, J. & Lewis, J. R.</td>
+            <td><em>Quantifying the User Experience</em> — Morgan Kaufmann</td>
+            <td>2016</td>
+            <td>ISBN 978-0-12-802034-3</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="comparativo">
+    <div class="section-header">
+      <div class="section-number">08</div>
+      <div>
+        <div class="section-title"><span class="dot" style="background:var(--accent1)"></span>Benchmarking, Comparativo & Especializados</div>
+        <div class="section-desc">Métodos complementares usados para comparação competitiva, fases específicas do projeto ou contextos especializados como realidade virtual, IoT e sistemas críticos.</div>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card" data-cat="quantitativo">
+        <div class="card-tag" style="color:var(--accent1)">◆ Benchmark</div>
+        <h3>Usability Benchmarking</h3>
+        <p>Medição sistemática de métricas (taxa de sucesso, tempo, SUS) ao longo do tempo ou vs. concorrentes. Permite rastrear evolução e comunicar ROI do design.</p>
+        <div class="card-meta"><span class="badge">Quantitativo</span><span class="badge">Longitudinal</span></div>
+      </div>
+      <div class="card" data-cat="quantitativo">
+        <div class="card-tag" style="color:var(--accent1)">◆ Guerrilha</div>
+        <h3>Guerrilla Usability Testing</h3>
+        <p>Testes rápidos e informais em cafeterias, eventos ou espaços públicos. Barato, rápido (5-15 min por sessão). Ideal para validações rápidas em fases iniciais.</p>
+        <div class="card-meta"><span class="badge">Rápido</span><span class="badge">Barato</span></div>
+      </div>
+      <div class="card" data-cat="quantitativo">
+        <div class="card-tag" style="color:var(--accent1)">◆ Hallway</div>
+        <h3>Hallway Testing</h3>
+        <p>Recrutamento de pessoas do corredor da empresa para teste rápido. Não são usuários-alvo, mas eficaz para identificar erros óbvios. Prática ágil recomendada por Joel Spolsky.</p>
+        <div class="card-meta"><span class="badge">Ágil</span><span class="badge">Barato</span></div>
+      </div>
+      <div class="card" data-cat="quantitativo">
+        <div class="card-tag" style="color:var(--accent1)">◆ Preditivo</div>
+        <h3>Desirability Testing (Microsoft Reaction Cards)</h3>
+        <p>Usuários selecionam adjetivos que descrevem o produto (118 cartões). Método de Benedek & Miner (2002). Mede percepção de personalidade da interface.</p>
+        <div class="card-meta"><span class="badge">Atitudinal</span><span class="badge">Percepção</span></div>
+      </div>
+      <div class="card" data-cat="quantitativo">
+        <div class="card-tag" style="color:var(--accent1)">◆ VR/AR</div>
+        <h3>Teste de Usabilidade em VR/AR/XR</h3>
+        <p>Adaptações dos métodos tradicionais para ambientes imersivos. Uso de eye tracking em headsets (Quest Pro, HoloLens), análise de presença e enjoo cinetótico (cybersickness).</p>
+        <div class="card-meta"><span class="badge">Emergente</span><span class="badge">Imersivo</span></div>
+      </div>
+      <div class="card" data-cat="quantitativo">
+        <div class="card-tag" style="color:var(--accent1)">◆ Crítico</div>
+        <h3>Usability Testing em Sistemas Críticos</h3>
+        <p>Métodos adaptados para saúde (IEC 62366), aviação (DO-178C) e militar. Exige protocolos rígidos, cenários de risco e análise de erros com potencial de dano.</p>
+        <div class="card-meta"><span class="badge">Regulatório</span><span class="badge">Saúde</span><span class="badge">Aviação</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:2rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Referência Principal</th>
+            <th>Publicação / Veículo</th>
+            <th>Ano</th>
+            <th>DOI / ISBN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Usability Benchmarking</strong></td>
+            <td>Tullis, T. & Albert, W.</td>
+            <td><em>Measuring the User Experience</em>, 2ª ed. — Morgan Kaufmann</td>
+            <td>2013</td>
+            <td>ISBN 978-0-12-415781-1</td>
+          </tr>
+          <tr>
+            <td><strong>Guerrilla Usability Testing</strong></td>
+            <td>Spool, J. M. & Schroeder, W.</td>
+            <td><em>Proc. ACM CHI 2001</em> — ACM Press</td>
+            <td>2001</td>
+            <td>10.1145/634067.634201</td>
+          </tr>
+          <tr>
+            <td><strong>Desirability Testing (Reaction Cards)</strong></td>
+            <td>Benedek, J. & Miner, T.</td>
+            <td><em>UPA Conference Proceedings 2002</em> — Microsoft Research</td>
+            <td>2002</td>
+            <td>microsoft.com/en-us/research/publication/measuring-desirability</td>
+          </tr>
+          <tr>
+            <td><strong>Usability Testing em VR/XR</strong></td>
+            <td>Bowman, D. A. et al.</td>
+            <td><em>3D User Interfaces: Theory and Practice</em> — Addison-Wesley</td>
+            <td>2005</td>
+            <td>ISBN 0-201-75867-9</td>
+          </tr>
+          <tr>
+            <td><strong>Cybersickness / Enjoo em VR</strong></td>
+            <td>Kennedy, R. S. et al.</td>
+            <td><em>Presence: Teleoperators and Virtual Environments</em>, 1(3)</td>
+            <td>1993</td>
+            <td>10.1162/pres.1993.1.3.306</td>
+          </tr>
+          <tr>
+            <td><strong>Usabilidade em Sistemas Médicos</strong></td>
+            <td>IEC</td>
+            <td><em>IEC 62366-1:2015 — Medical Devices Usability</em></td>
+            <td>2015</td>
+            <td>iso.org/standard/63179.html</td>
+          </tr>
+          <tr>
+            <td><strong>Número de participantes para testes</strong></td>
+            <td>Nielsen, J. & Landauer, T. K.</td>
+            <td><em>Proc. ACM INTERCHI 1993</em> — ACM Press</td>
+            <td>1993</td>
+            <td>10.1145/169059.169166</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Matrix -->
+  <section>
+    <div class="section-header">
+      <div class="section-number">—</div>
+      <div>
+        <div class="section-title">Matriz de Seleção de Métodos</div>
+        <div class="section-desc">Framework de Rosson & Carroll para escolha do método mais adequado conforme fase do projeto, recursos e objetivo da pesquisa.</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fase do Projeto</th>
+            <th>Objetivo</th>
+            <th>Métodos Recomendados</th>
+            <th>Tempo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Descoberta</strong></td>
+            <td>Entender usuários e contexto</td>
+            <td>Contextual Inquiry, Diary Study, Entrevistas</td>
+            <td>2-4 semanas</td>
+          </tr>
+          <tr>
+            <td><strong>Exploração (Lo-Fi)</strong></td>
+            <td>Validar estrutura e fluxo</td>
+            <td>Card Sorting, Tree Testing, Wizard of Oz, Cognitive Walkthrough</td>
+            <td>1-2 semanas</td>
+          </tr>
+          <tr>
+            <td><strong>Refinamento (Protótipo)</strong></td>
+            <td>Identificar problemas de usabilidade</td>
+            <td>Think-Aloud, Avaliação Heurística, First Click Test, Five-Second Test</td>
+            <td>1-2 semanas</td>
+          </tr>
+          <tr>
+            <td><strong>Validação (Hi-Fi)</strong></td>
+            <td>Medir eficácia/eficiência/satisfação</td>
+            <td>Teste moderado com métricas, SUS, ASQ, A/B Testing</td>
+            <td>2-3 semanas</td>
+          </tr>
+          <tr>
+            <td><strong>Produção (Contínuo)</strong></td>
+            <td>Monitorar e otimizar</td>
+            <td>Heatmaps, Analytics, Micro-surveys, Benchmarking, Session Recording</td>
+            <td>Contínuo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REFERÊNCIAS ABNT -->
+  <section id="referencias" style="border-bottom:none; padding-bottom:2rem;">
+    <div class="section-header">
+      <div class="section-number">REF</div>
+      <div>
+        <div class="section-title">Referências Bibliográficas</div>
+        <div class="section-desc">Todas as obras citadas neste documento, ordenadas alfabeticamente conforme <strong>ABNT NBR 6023:2018</strong>.</div>
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:2.5rem; border-left:3px solid var(--accent1);">
+      <ol class="ref-list">
+
+        <li>BANGOR, Aaron; KORTUM, Philip T.; MILLER, James T. An empirical evaluation of the System Usability Scale. <strong>International Journal of Human-Computer Interaction</strong>, Philadelphia, v. 24, n. 6, p. 574–594, 2008. DOI: 10.1080/10447310802205776.</li>
+
+        <li>BENEDEK, Joey; MINER, Trish. Measuring desirability: new methods for evaluating desirability in a usability lab setting. In: <strong>USABILITY PROFESSIONALS ASSOCIATION CONFERENCE</strong>, 2002, Orlando. <strong>Proceedings…</strong> Redmond: Microsoft Corporation, 2002. Disponível em: https://microsoft.com/en-us/research/publication/measuring-desirability. Acesso em: fev. 2026.</li>
+
+        <li>BEYER, Hugh; HOLTZBLATT, Karen. <strong>Contextual design: defining customer-centered systems</strong>. San Francisco: Morgan Kaufmann, 1998. ISBN 1-55860-411-1.</li>
+
+        <li>BIAS, Randolph G. The pluralistic usability walkthrough: coordinated empathies. In: NIELSEN, Jakob; MACK, Robert L. (ed.). <strong>Usability inspection methods</strong>. New York: Wiley, 1994. cap. 3, p. 63–76. ISBN 0-471-01877-5.</li>
+
+        <li>BOWMAN, Doug A. et al. <strong>3D user interfaces: theory and practice</strong>. Boston: Addison-Wesley, 2005. ISBN 0-201-75867-9.</li>
+
+        <li>BRASIL. Secretaria de Logística e Tecnologia da Informação. <strong>eMAG — Modelo de Acessibilidade em Governo Eletrônico</strong>. Versão 3.1. Brasília: Ministério do Planejamento, Orçamento e Gestão, 2014. Disponível em: http://emag.governoeletronico.gov.br. Acesso em: fev. 2026.</li>
+
+        <li>BROOKE, John. SUS: a "quick and dirty" usability scale. In: JORDAN, Patrick W. et al. (ed.). <strong>Usability evaluation in industry</strong>. London: Taylor & Francis, 1996. p. 189–194. ISBN 0-7484-0695-7.</li>
+
+        <li>BRUSH, A. J. Bernheim et al. Analytic models for mobile unmoderated user studies. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 2004</strong>, 2004, Vienna. <strong>Proceedings…</strong> New York: ACM Press, 2004. p. 1421–1424. DOI: 10.1145/985692.985768.</li>
+
+        <li>CARD, Stuart K.; MORAN, Thomas P.; NEWELL, Allen. <strong>The psychology of human-computer interaction</strong>. Hillsdale: Lawrence Erlbaum Associates, 1983. ISBN 0-89859-234-7.</li>
+
+        <li>CARTER, Scott; MANKOFF, Jennifer. When participants do the capturing: the role of media in diary studies. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 2005</strong>, 2005, Portland. <strong>Proceedings…</strong> New York: ACM Press, 2005. p. 899–908. DOI: 10.1145/1054972.1055055.</li>
+
+        <li>CHIN, John P.; DIEHL, Virginia A.; NORMAN, Kent L. Development of an instrument measuring user satisfaction of the human-computer interface. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 1988</strong>, 1988, Washington. <strong>Proceedings…</strong> New York: ACM Press, 1988. p. 213–218. DOI: 10.1145/57167.57203.</li>
+
+        <li>COOKE, Lynne. Assessing concurrent think-aloud protocol as a usability test technique: a technical communication approach. <strong>IEEE Transactions on Professional Communication</strong>, Piscataway, v. 53, n. 2, p. 202–215, 2010. DOI: 10.1109/TPC.2010.2046100.</li>
+
+        <li>CSIKSZENTMIHALYI, Mihaly; LARSON, Reed. Validity and reliability of the experience-sampling method. <strong>Journal of Nervous and Mental Disease</strong>, Baltimore, v. 175, n. 9, p. 526–536, 1987. DOI: 10.1097/00005053-198709000-00004.</li>
+
+        <li>CYBIS, Walter; BETIOL, Adriana H.; FAUST, Richard. <strong>Ergonomia e usabilidade: conhecimentos, métodos e aplicações</strong>. 2. ed. São Paulo: Novatec, 2010. ISBN 978-85-7522-143-6.</li>
+
+        <li>DIMOKA, Angelika et al. On the use of neurophysiological tools in IS research: developing a research agenda for NeuroIS. <strong>MIS Quarterly</strong>, Minneapolis, v. 36, n. 3, p. 679–702, 2012. DOI: 10.2307/41703475.</li>
+
+        <li>EKMAN, Paul; FRIESEN, Wallace V. <strong>Facial action coding system: a technique for the measurement of facial movement</strong>. Palo Alto: Consulting Psychologists Press, 1978. ISBN 0-931136-02-8.</li>
+
+        <li>ERICSSON, Karl Anders; SIMON, Herbert A. <strong>Protocol analysis: verbal reports as data</strong>. Cambridge: MIT Press, 1980. Edição revisada: 1993. ISBN 0-262-55010-2.</li>
+
+        <li>FAIRCLOUGH, Steve H. Fundamentals of physiological computing. <strong>Interacting with Computers</strong>, Oxford, v. 21, n. 1-2, p. 133–145, 2009. DOI: 10.1016/j.intcom.2008.10.011.</li>
+
+        <li>FAIRCLOUGH, Steve H. Psychophysiological inference and physiological computer interfaces. <strong>Applied Ergonomics</strong>, Oxford, v. 40, n. 3, p. 510–519, 2009. DOI: 10.1016/j.apergo.2008.06.011.</li>
+
+        <li>FINSTAD, Kraig. The usability metric for user experience. <strong>Interacting with Computers</strong>, Oxford, v. 22, n. 5, p. 323–327, 2010. DOI: 10.1016/j.intcom.2010.04.004.</li>
+
+        <li>HART, Sandra G.; STAVELAND, Lowell E. Development of NASA-TLX (Task Load Index): results of empirical and theoretical research. <strong>Advances in Psychology</strong>, Amsterdam, v. 52, p. 139–183, 1988. DOI: 10.1016/S0166-4115(08)62386-9.</li>
+
+        <li>HASSENZAHL, Marc; BURMESTER, Michael; KOLLER, Franz. AttrakDiff: ein Fragebogen zur Messung wahrgenommener hedonischer und pragmatischer Qualität. In: <strong>MENSCH & COMPUTER 2003</strong>, 2003, Stuttgart. <strong>Proceedings…</strong> Berlin: Springer, 2003. p. 187–196. DOI: 10.1007/978-3-322-80058-9_19.</li>
+
+        <li>HENRY, Shawn Lawton. <strong>Just ask: integrating accessibility throughout design</strong>. Madison: Lulu Press, 2007. ISBN 978-1-4303-1640-7. Disponível em: http://uiaccess.com/accessucd. Acesso em: fev. 2026.</li>
+
+        <li>INTERNATIONAL ELECTROTECHNICAL COMMISSION. <strong>IEC 62366-1:2015 — Medical devices: part 1: application of usability engineering to medical devices</strong>. Geneva: IEC, 2015. Disponível em: https://www.iso.org/standard/63179.html. Acesso em: fev. 2026.</li>
+
+        <li>INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. <strong>ISO 9241-11:2018 — Ergonomics of human-system interaction: part 11: usability: definitions and concepts</strong>. Geneva: ISO, 2018. Disponível em: https://www.iso.org/standard/63500.html. Acesso em: fev. 2026.</li>
+
+        <li>INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. <strong>ISO 9241-171:2008 — Ergonomics of human-system interaction: part 171: guidance on software accessibility</strong>. Geneva: ISO, 2008. Disponível em: https://www.iso.org/standard/39080.html. Acesso em: fev. 2026.</li>
+
+        <li>KENNEDY, Rex S. et al. Simulator sickness questionnaire: an enhanced method for quantifying simulator sickness. <strong>International Journal of Aviation Psychology</strong>, Mahwah, v. 3, n. 3, p. 203–220, 1993. DOI: 10.1207/s15327108ijap0303_3.</li>
+
+        <li>KENNEDY, Sheelagh. Using video in the BNR usability lab. <strong>SIGCHI Bulletin</strong>, New York, v. 20, n. 4, p. 92–95, 1989. DOI: 10.1145/1165385.1165394.</li>
+
+        <li>KENNING, Peter H.; PLASSMANN, Hilke. How neuroscience can inform consumer research. <strong>Journal of Consumer Behaviour</strong>, Hoboken, v. 7, n. 4-5, p. 271–274, 2008. DOI: 10.1002/cb.257.</li>
+
+        <li>KOHAVI, Ron; TANG, Diane; XU, Ya. <strong>Trustworthy online controlled experiments: a practical guide to A/B testing</strong>. Cambridge: Cambridge University Press, 2020. ISBN 978-1-108-72426-5.</li>
+
+        <li>KOHAVI, Ron et al. Practical guide to controlled experiments on the web. In: <strong>ACM SIGKDD INTERNATIONAL CONFERENCE ON KNOWLEDGE DISCOVERY AND DATA MINING</strong>, 13., 2007, San Jose. <strong>Proceedings…</strong> New York: ACM Press, 2007. p. 959–967. DOI: 10.1145/1281192.1281295.</li>
+
+        <li>LAUGWITZ, Bettina; HELD, Theo; SCHREPP, Martin. Construction and evaluation of a user experience questionnaire. In: <strong>HCI AND USABILITY FOR EDUCATION AND WORK</strong>, 2008, Graz. <strong>Proceedings…</strong> Berlin: Springer, 2008. (Lecture Notes in Computer Science, v. 5298). p. 63–76. DOI: 10.1007/978-3-540-89350-9_6.</li>
+
+        <li>LAZAR, Jonathan; FENG, Jinjuan H.; HOCHHEISER, Harry. <strong>Research methods in human-computer interaction</strong>. Chichester: Wiley, 2010. ISBN 978-0-470-72337-1.</li>
+
+        <li>LEWIS, Clayton et al. Testing a walkthrough methodology for theory-based design of walk-up-and-use interfaces. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 1990</strong>, 1990, Seattle. <strong>Proceedings…</strong> New York: ACM Press, 1990. p. 235–242. DOI: 10.1145/97243.97279.</li>
+
+        <li>LEWIS, James R. Psychometric evaluation of an after-scenario questionnaire for computer usability studies: the ASQ. <strong>SIGCHI Bulletin</strong>, New York, v. 23, n. 1, p. 78–81, 1991. DOI: 10.1145/122672.122692.</li>
+
+        <li>LEWIS, James R. Psychometric evaluation of the post-study system usability questionnaire: the PSSUQ. In: <strong>HUMAN FACTORS AND ERGONOMICS SOCIETY ANNUAL MEETING</strong>, 36., 1992, Atlanta. <strong>Proceedings…</strong> Santa Monica: HFES, 1992. p. 1259–1263.</li>
+
+        <li>LEWIS, James R. IBM computer usability satisfaction questionnaires: psychometric evaluation and instructions for use. <strong>International Journal of Human-Computer Interaction</strong>, Philadelphia, v. 7, n. 1, p. 57–78, 1995. DOI: 10.1080/10447319509526115.</li>
+
+        <li>MANDRYK, Regan L.; ATKINS, M. Stella. A fuzzy physiological approach for continuously modeling emotion during interaction with play technologies. <strong>International Journal of Human-Computer Studies</strong>, Orlando, v. 65, n. 4, p. 329–347, 2007. DOI: 10.1016/j.ijhcs.2006.11.011.</li>
+
+        <li>MAULSBY, David et al. Prototyping an intelligent agent through Wizard of Oz. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 1993</strong>, 1993, Amsterdam. <strong>Proceedings…</strong> New York: ACM Press, 1993. p. 277–284. DOI: 10.1145/259963.260328.</li>
+
+        <li>NIELSEN, Jakob. <strong>Usability engineering</strong>. Boston: Academic Press, 1993. ISBN 0-12-518406-9.</li>
+
+        <li>NIELSEN, Jakob; LANDAUER, Thomas K. A mathematical model of the finding of usability problems. In: <strong>ACM INTERCHI CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS</strong>, 1993, Amsterdam. <strong>Proceedings…</strong> New York: ACM Press, 1993. p. 206–213. DOI: 10.1145/169059.169166.</li>
+
+        <li>NIELSEN, Jakob; MOLICH, Rolf. Heuristic evaluation of user interfaces. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 1990</strong>, 1990, Seattle. <strong>Proceedings…</strong> New York: ACM Press, 1990. p. 249–256. DOI: 10.1145/97243.97281.</li>
+
+        <li>NIELSEN, Jakob; PERNICE, Kara. <strong>Eyetracking web usability</strong>. Berkeley: New Riders, 2010. ISBN 978-0-321-49836-5.</li>
+
+        <li>RAYNER, Keith. Eye movements in reading and information processing: 20 years of research. <strong>Psychological Bulletin</strong>, Washington, v. 124, n. 3, p. 372–422, 1998. DOI: 10.1037/0033-2909.124.3.372.</li>
+
+        <li>REICHHELD, Frederick F. The one number you need to grow. <strong>Harvard Business Review</strong>, Boston, v. 81, n. 12, p. 46–54, dez. 2003. Disponível em: https://hbr.org/2003/12/the-one-number-you-need-to-grow. Acesso em: fev. 2026.</li>
+
+        <li>RODDEN, Kerry; HUTCHINSON, Hilary; FU, Xin. Measuring the user experience on a large scale: user-centered metrics for web applications. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 2010</strong>, 2010, Atlanta. <strong>Proceedings…</strong> New York: ACM Press, 2010. p. 2395–2398. DOI: 10.1145/1753326.1753687.</li>
+
+        <li>ROSSON, Mary Beth; CARROLL, John M. <strong>Usability engineering: scenario-based development of human-computer interaction</strong>. San Francisco: Morgan Kaufmann, 2002. ISBN 1-55860-712-9.</li>
+
+        <li>SAURO, Jeff. <strong>SUPR-Q: a comprehensive measure of the quality of the website user experience</strong>. Denver: MeasuringU Press, 2015. Disponível em: https://measuringu.com/suprq. Acesso em: fev. 2026.</li>
+
+        <li>SAURO, Jeff; DUMAS, Joseph S. Comparison of three one-question, post-task usability questionnaires. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 2009</strong>, 2009, Boston. <strong>Proceedings…</strong> New York: ACM Press, 2009. p. 1599–1608. DOI: 10.1145/1518701.1518946.</li>
+
+        <li>SAURO, Jeff; LEWIS, James R. <strong>Quantifying the user experience: practical statistics for user research</strong>. 2. ed. Waltham: Morgan Kaufmann, 2016. ISBN 978-0-12-802034-3.</li>
+
+        <li>SHNEIDERMAN, Ben. <strong>Designing the user interface: strategies for effective human-computer interaction</strong>. Reading: Addison-Wesley, 1987. ISBN 0-201-16505-8.</li>
+
+        <li>SPENCER, Donna. <strong>Card sorting: designing usable categories</strong>. New York: Rosenfeld Media, 2009. ISBN 978-1-933820-02-6.</li>
+
+        <li>SPOOL, Jared M.; SCHROEDER, Will. Testing web sites: five users is nowhere near enough. In: <strong>ACM CONFERENCE ON HUMAN FACTORS IN COMPUTING SYSTEMS — CHI 2001</strong>, 2001, Seattle. <strong>Extended Abstracts…</strong> New York: ACM Press, 2001. p. 285–286. DOI: 10.1145/634067.634201.</li>
+
+        <li>TULLIS, Tom; ALBERT, Bill. <strong>Measuring the user experience: collecting, analyzing, and presenting usability metrics</strong>. 2. ed. Waltham: Morgan Kaufmann, 2013. ISBN 978-0-12-415781-1.</li>
+
+        <li>VAN DEN HAAK, Maaike J.; DE JONG, Menno D. T.; SCHELLENS, Peter Jan. Retrospective vs. concurrent think-aloud protocols: testing the usability of an online library catalogue. <strong>Behaviour & Information Technology</strong>, London, v. 22, n. 5, p. 339–351, 2003. DOI: 10.1080/0144929031000157985.</li>
+
+        <li>W3C — WORLD WIDE WEB CONSORTIUM. <strong>Web Content Accessibility Guidelines (WCAG) 2.2</strong>. W3C Recommendation. Geneva: W3C, 5 out. 2023. Disponível em: https://www.w3.org/TR/WCAG22. Acesso em: fev. 2026.</li>
+
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    <div style="max-width:700px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:1rem;">
+      <div class="credentials-badge" style="font-size:11px; padding:0.4rem 1rem;">🚧 &nbsp;Site em fase de construção</div>
+      <p style="color:var(--muted); font-size:12px; line-height:1.7; text-align:center;">
+        Organizado por <strong style="color:var(--text)">Profa. Dra. Danielle Pompeu Noronha Pontes</strong> — Universidade do Estado do Amazonas (UEA)<br>
+        Desenvolvido com suporte de IA generativa (Claude — Anthropic) sob supervisão da autora · DOIs verificáveis em doi.org
+      </p>
+      <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--border); letter-spacing:0.15em; text-transform:uppercase;">© 2025 · UEA · Todos os direitos reservados</div>
+    </div>
+  </footer>
+
 </div>
-
-<main>
-  <div class="project-bar">
-    <div class="project-field">
-      <label>✉️ E-mail:</label>
-      <input type="email" id="evaluatorEmail" placeholder="seu@email.com" />
-    </div>
-    <div class="project-field">
-      <label>🌐 Site:</label>
-      <input type="text" id="projectName" placeholder="www.exemplo.com.br" />
-    </div>
-  </div>
-
-  <div class="section active" id="section-nielsen">
-    <div class="framework-intro">
-      <div class="icon">🎯</div>
-      <div>
-        <h2>10 Heurísticas de Nielsen</h2>
-        <p>Criadas por Jakob Nielsen em 1994, são os princípios mais utilizados em avaliações heurísticas no mundo. Cada heurística aponta um aspecto essencial da usabilidade.</p>
-        <span class="tag">Nielsen Norman Group · 1994</span>
-      </div>
-    </div>
-    <div class="ref-box">
-      <h4>📚 Referencial Teórico</h4>
-      <p>A <strong>Avaliação Heurística</strong> é um método de inspeção de usabilidade proposto por Nielsen e Molich (1990) e consolidado por Nielsen (1994). Consiste em examinar a interface com base em princípios estabelecidos — as heurísticas — sem a participação direta de usuários finais. Por ser de baixo custo e alta eficiência, é amplamente adotado tanto na academia quanto na indústria.</p>
-      <p>As 10 heurísticas foram derivadas de uma análise fatorial de 249 problemas de usabilidade (Nielsen, 1994) e representam os aspectos mais recorrentes de falhas em interfaces. Estudos demonstram que um grupo de 3 a 5 avaliadores é suficiente para identificar entre 75% e 90% dos problemas de usabilidade de uma interface.</p>
-      <span class="ref-cite">NIELSEN, J. Enhancing the explanatory power of usability heuristics. In: CHI Conference on Human Factors in Computing Systems, 1994. ACM, p. 152–158.<br>NIELSEN, J.; MOLICH, R. Heuristic evaluation of user interfaces. In: CHI, 1990. ACM, p. 249–256.</span>
-    </div>
-    <div class="severity-legend">
-      <span>Pontuação:</span>
-      <div class="sev-item"><div class="sev-dot" style="background:var(--red)"></div>0 = Péssimo</div>
-      <div class="sev-item"><div class="sev-dot" style="background:#f97316"></div>1 = Ruim</div>
-      <div class="sev-item"><div class="sev-dot" style="background:var(--yellow)"></div>2 = Regular</div>
-      <div class="sev-item"><div class="sev-dot" style="background:#a3e635"></div>3 = Bom</div>
-      <div class="sev-item"><div class="sev-dot" style="background:var(--green)"></div>4 = Excelente</div>
-      <div class="sev-item"><div class="sev-dot" style="background:var(--border)"></div>N/A = Não se aplica</div>
-    </div>
-    <div id="criteria-nielsen"></div>
-  </div>
-
-  <div class="section" id="section-bastien">
-    <div class="framework-intro">
-      <div class="icon">🔬</div>
-      <div>
-        <h2>Critérios Ergonômicos de Bastien &amp; Scapin</h2>
-        <p>Desenvolvidos em 1993 pelo INRIA (França), estes 18 critérios oferecem análise granular e operacional da interface — muito usados em pesquisa acadêmica de IHC.</p>
-        <span class="tag">INRIA · Bastien &amp; Scapin · 1993</span>
-      </div>
-    </div>
-    <div class="ref-box">
-      <h4>📚 Referencial Teórico</h4>
-      <p>Os <strong>Critérios Ergonômicos</strong> de Bastien e Scapin foram desenvolvidos no Instituto Nacional de Pesquisa em Informática e Automação da França (INRIA) como resultado de extensa revisão de literatura e estudos empíricos sobre erros de usabilidade em sistemas interativos. Diferentemente das heurísticas de Nielsen, este conjunto oferece critérios mais operacionais e decompostos, facilitando a identificação precisa de problemas específicos.</p>
-      <p>Os 18 critérios estão organizados em 8 dimensões principais: Condução, Carga de Trabalho, Controle Explícito, Adaptabilidade, Gestão de Erros, Consistência, Significado dos Códigos e Compatibilidade. Essa estrutura hierárquica permite diagnósticos mais granulares e é especialmente valorizada em contextos acadêmicos de IHC por sua rigorosidade metodológica.</p>
-      <span class="ref-cite">BASTIEN, J. M. C.; SCAPIN, D. L. Ergonomic criteria for the evaluation of human-computer interfaces. Technical Report INRIA nº 156, 1993.<br>SCAPIN, D. L.; BASTIEN, J. M. C. Ergonomic criteria for evaluating the ergonomic quality of interactive systems. Behaviour &amp; Information Technology, v. 16, n. 4-5, p. 220–231, 1997.</span>
-    </div>
-    <div id="criteria-bastien"></div>
-  </div>
-
-  <div class="section" id="section-wcag">
-    <div class="framework-intro">
-      <div class="icon">♿</div>
-      <div>
-        <h2>Diretrizes de Acessibilidade WCAG 2.1</h2>
-        <p>Padrão internacional do W3C organizado em 4 princípios: Perceptível, Operável, Compreensível e Robusto (POUR).</p>
-        <span class="tag">W3C · WCAG 2.1 · 2018</span>
-      </div>
-    </div>
-    <div class="ref-box">
-      <h4>📚 Referencial Teórico</h4>
-      <p>As <strong>Web Content Accessibility Guidelines (WCAG)</strong> são desenvolvidas pelo World Wide Web Consortium (W3C) por meio do Web Accessibility Initiative (WAI). A versão 2.1, publicada em 2018, expande a versão anterior com critérios voltados para dispositivos móveis, baixa visão e deficiências cognitivas. No Brasil, a acessibilidade digital é regulamentada pelo Decreto nº 5.296/2004 e pelo eMAG — Modelo de Acessibilidade em Governo Eletrônico.</p>
-      <p>As WCAG organizam-se em três níveis de conformidade: A (mínimo), AA (recomendado) e AAA (máximo). Os critérios desta ferramenta cobrem principalmente o nível AA, que é o padrão exigido por legislações de acessibilidade em diversos países. A avaliação de acessibilidade pode ser conduzida manualmente, com tecnologias assistivas ou com ferramentas automatizadas como axe, Lighthouse e WAVE.</p>
-      <span class="ref-cite">W3C. Web Content Accessibility Guidelines (WCAG) 2.1. W3C Recommendation, 05 June 2018. Disponível em: https://www.w3.org/TR/WCAG21/<br>BRASIL. Decreto nº 5.296 de 2 de dezembro de 2004. Regulamenta as Leis nº 10.048 e nº 10.098.</span>
-    </div>
-    <div id="criteria-wcag"></div>
-  </div>
-
-  <div class="section" id="section-gestalt">
-    <div class="framework-intro">
-      <div class="icon">👁️</div>
-      <div>
-        <h2>Princípios da Gestalt na Interface</h2>
-        <p>Leis da percepção visual da psicologia alemã (séc. XX). Explicam como o cérebro organiza elementos visuais — fundamentais para hierarquia e layout.</p>
-        <span class="tag">Psicologia da Gestalt · Wertheimer · 1923</span>
-      </div>
-    </div>
-    <div class="ref-box">
-      <h4>📚 Referencial Teórico</h4>
-      <p>A <strong>Psicologia da Gestalt</strong> surgiu na Alemanha no início do século XX com os trabalhos de Max Wertheimer, Wolfgang Köhler e Kurt Koffka. Seu princípio fundamental é que "o todo é diferente da soma das partes" — o cérebro humano percebe padrões, estruturas e formas de maneira holística, e não elemento por elemento. Aplicada ao design de interfaces, a Gestalt explica como usuários agrupam informações, identificam hierarquias e percebem relações entre elementos visuais.</p>
-      <p>Em IHC, os princípios da Gestalt são aplicados para guiar decisões de layout, tipografia, uso de espaço em branco, agrupamento de controles e hierarquia visual. Estudos de rastreamento ocular (eye-tracking) têm confirmado empiricamente que interfaces que respeitam estes princípios resultam em menor carga cognitiva, maior eficiência na busca de informação e melhor satisfação do usuário (Lidwell et al., 2010).</p>
-      <span class="ref-cite">WERTHEIMER, M. Laws of organization in perceptual forms. In: ELLIS, W. D. (ed.). A source book of Gestalt psychology. London: Routledge, 1938. p. 71–88.<br>LIDWELL, W.; HOLDEN, K.; BUTLER, J. Universal Principles of Design. 2. ed. Beverly: Rockport Publishers, 2010.</span>
-    </div>
-    <div id="criteria-gestalt"></div>
-  </div>
-
-  <div class="section" id="section-dashboard">
-    <div class="framework-intro">
-      <div class="icon">📊</div>
-      <div>
-        <h2>Resultado da Avaliação</h2>
-        <p>Resumo consolidado com pontuações por framework e identificação dos pontos críticos da interface avaliada.</p>
-      </div>
-    </div>
-    <div class="info-box">
-      <strong>💡 Exportar CSV:</strong> Gera uma linha com e-mail, site, data e todas as pontuações. Abra no Excel ou Google Sheets para comparar avaliações de múltiplos avaliadores ou sites.
-    </div>
-    <div class="dashboard-grid" id="scorecards"></div>
-    <div id="report-body"></div>
-    <div class="btn-row">
-      <button class="export-btn btn-csv" onclick="exportCSV()">📥 Exportar CSV (para Excel)</button>
-      <button class="export-btn btn-txt" onclick="exportTXT()">📄 Exportar relatório (.txt)</button>
-    </div>
-  </div>
-</main>
-
-<script>
-const DATA = {
-  nielsen: { color:'#7c6af7', items:[
-    {id:'n1',num:'H01',title:'Visibilidade do Status do Sistema',subtitle:'O sistema sempre informa os usuários sobre o que está acontecendo, com feedback adequado em tempo razoável.',good:['Barra de progresso ao fazer upload','Animação de carregamento visível','"Enviado com sucesso!" após formulário'],bad:['Botão sem nenhum retorno ao clicar','Formulário que some sem mensagem de confirmação']},
-    {id:'n2',num:'H02',title:'Correspondência entre Sistema e Mundo Real',subtitle:'O sistema usa linguagem familiar ao usuário — palavras e conceitos do mundo real, não jargão técnico interno.',good:['Ícone de lixeira para deletar','Linguagem em português claro','Metáforas visuais intuitivas (pasta, envelope)'],bad:['"HTTP 403 Forbidden" como mensagem de erro','Siglas técnicas sem explicação']},
-    {id:'n3',num:'H03',title:'Controle e Liberdade do Usuário',subtitle:'Usuários cometem erros e precisam de saídas de emergência claramente marcadas. Suporte a desfazer e refazer.',good:['Botão "Cancelar" bem visível','Ctrl+Z funcional','"Tem certeza?" antes de deletar','Fechar modal com Esc'],bad:['Sem botão de voltar','Ação irreversível sem confirmação','Modal sem botão de fechar']},
-    {id:'n4',num:'H04',title:'Consistência e Padrões',subtitle:'Seguir convenções da plataforma. Mesma palavra deve sempre significar a mesma coisa. Mesmos padrões visuais para mesmas funções.',good:['Botões com estilo consistente em todo o site','Mesmo vocabulário em todos os fluxos'],bad:['Botão "Salvar" às vezes verde, às vezes azul','"Fechar" e "Cancelar" usados aleatoriamente']},
-    {id:'n5',num:'H05',title:'Prevenção de Erros',subtitle:'Design cuidadoso que previne problemas antes que ocorram — melhor que boas mensagens de erro.',good:['Validação em tempo real no formulário','Autocompletar para reduzir digitação','Confirmar antes de ação crítica'],bad:['Campo de data sem indicação do formato','Sem limite de caracteres visível']},
-    {id:'n6',num:'H06',title:'Reconhecimento em Vez de Memorização',subtitle:'Minimizar a carga de memória do usuário. Objetos, ações e opções devem estar visíveis ou facilmente recuperáveis.',good:['Menu sempre visível','Breadcrumb de navegação','Histórico de pesquisas recentes'],bad:['Atalhos de teclado sem indicação visual','Usuário não sabe em que etapa do fluxo está']},
-    {id:'n7',num:'H07',title:'Flexibilidade e Eficiência de Uso',subtitle:'Aceleradores para usuários experientes. Interface funciona para iniciantes e experts.',good:['Atalhos de teclado documentados','Filtros avançados','Personalização da interface'],bad:['Sem atalhos de teclado','Fluxo sempre longo mesmo para tarefas simples']},
-    {id:'n8',num:'H08',title:'Estética e Design Minimalista',subtitle:'Não incluir informação irrelevante. Cada elemento extra compete com os relevantes.',good:['Layout limpo com hierarquia clara','Sem pop-ups desnecessários','Conteúdo focado na tarefa'],bad:['Página cheia de banners','Informações não relacionadas misturadas']},
-    {id:'n9',num:'H09',title:'Ajuda ao Reconhecimento e Recuperação de Erros',subtitle:'Mensagens de erro em linguagem simples, que indicam o problema com precisão e sugerem solução.',good:['"E-mail inválido — use o formato nome@dominio.com"','Campo com erro destacado em vermelho com explicação'],bad:['"Erro 500"','"Operação não permitida" sem contexto']},
-    {id:'n10',num:'H10',title:'Ajuda e Documentação',subtitle:'Fornecer ajuda fácil de buscar, focada na tarefa do usuário.',good:['FAQ organizado e pesquisável','Tooltips contextuais nos campos','Central de ajuda com busca'],bad:['Sem seção de ajuda','Documentação técnica demais para o público']}
-  ]},
-  bastien: { color:'#f7a26a', items:[
-    {id:'b1',num:'B01',title:'Presteza',subtitle:'O sistema fornece informações que permitem ao usuário saber onde está, o que pode fazer e como fazê-lo.',good:['Indicadores de seção ativa no menu','Instruções claras em formulários','Labels descritivos em todos os campos'],bad:['Campos sem label','Usuário sem saber em que etapa está']},
-    {id:'b2',num:'B02',title:'Agrupamento / Distinção por Localização',subtitle:'Itens relacionados estão próximos e agrupados. Itens diferentes estão separados visualmente.',good:['Menu agrupado por categoria','Formulário com seções separadas','Cards bem delimitados'],bad:['Informações relacionadas espalhadas pela página','Botões de ações opostas sem separação']},
-    {id:'b3',num:'B03',title:'Agrupamento / Distinção por Formato',subtitle:'Distinção visual entre tipos de elementos por cor, forma, tamanho ou fonte.',good:['Títulos em tamanho maior que o corpo','Botões primários vs secundários distintos','Links em cor diferente do texto'],bad:['Todo o texto no mesmo estilo','Links indistinguíveis do texto comum']},
-    {id:'b4',num:'B04',title:'Feedback Imediato',subtitle:'Resposta rápida e adequada do sistema a todas as ações do usuário.',good:['Hover visível nos botões','Confirmação visual de envio','Indicador de carregamento em ações demoradas'],bad:['Botão que não reage ao clique','Demora sem nenhum feedback']},
-    {id:'b5',num:'B05',title:'Legibilidade',subtitle:'Características que afetam a leitura — contraste, tamanho de fonte, espaçamento entre linhas.',good:['Contraste ≥ 4.5:1 para texto normal','Fonte ≥ 16px para corpo','Entrelinha entre 1.4 e 1.6'],bad:['Texto cinza claro em fundo branco','Fonte muito pequena','Linhas com mais de 80 caracteres']},
-    {id:'b6',num:'B06',title:'Concisão',subtitle:'Brevidade nas entradas e saídas — dados mínimos necessários para a tarefa.',good:['Formulário com apenas os campos essenciais','Mensagens curtas e diretas'],bad:['Formulário de cadastro com 20+ campos','Textos prolixos que escondem a informação']},
-    {id:'b7',num:'B07',title:'Ações Mínimas',subtitle:'Minimizar o número de ações necessárias para realizar uma tarefa.',good:['Checkout em poucos passos','Login com redes sociais','Autopreenchimento de endereço por CEP'],bad:['5 telas para uma compra simples','Confirmação de e-mail antes de qualquer acesso']},
-    {id:'b8',num:'B08',title:'Densidade Informacional',subtitle:'Volume de informação não deve sobrecarregar a memória de trabalho do usuário.',good:['Paginação em listas longas','Progressive disclosure','Resumo antes do detalhe'],bad:['Tabela com 20+ colunas visíveis','Todos os dados exibidos de uma vez']},
-    {id:'b9',num:'B09',title:'Ações Explícitas',subtitle:'O sistema executa ações somente quando o usuário pede explicitamente — sem efeitos colaterais surpresa.',good:['Salvar apenas ao clicar "Salvar"','Confirmar antes de enviar formulário crítico'],bad:['Autosalvar sem aviso visível','Envio automático ao pressionar Enter inesperadamente']},
-    {id:'b10',num:'B10',title:'Controle do Usuário',subtitle:'O usuário controla o sistema — pode parar, pausar ou cancelar operações.',good:['Botão para cancelar downloads','Fechar modais com Esc','Cancelar operações em andamento'],bad:['Modal que não pode ser fechado','Redirecionamento automático sem opção de cancelar']},
-    {id:'b11',num:'B11',title:'Flexibilidade',subtitle:'Adaptação às diversas necessidades e preferências dos usuários.',good:['Modo claro e escuro disponíveis','Tamanho de fonte ajustável','Atalhos configuráveis'],bad:['Sem nenhuma opção de personalização','Layout completamente fixo']},
-    {id:'b12',num:'B12',title:'Consideração da Experiência do Usuário',subtitle:'Levar em conta a diversidade de usuários — novatos e experientes têm necessidades diferentes.',good:['Onboarding para novos usuários','Modo básico e avançado separados','Tooltips opcionais para iniciantes'],bad:['Interface que assume expertise do usuário','Sem guia ou tutorial para novos usuários']},
-    {id:'b13',num:'B13',title:'Proteção contra Erros',subtitle:'Meios para evitar e recuperar de erros de entrada de dados.',good:['Validação antes do envio final','Undo disponível para ações importantes','Confirmação para ações destrutivas'],bad:['Deletar item sem confirmação','Formulário que limpa todos os campos ao errar um']},
-    {id:'b14',num:'B14',title:'Qualidade das Mensagens de Erro',subtitle:'Mensagens precisas que indicam a natureza exata do erro e como corrigi-lo.',good:['"Senha deve ter ao menos 8 caracteres com uma maiúscula"','Destaque visual no campo problemático'],bad:['"Erro ao processar"','"Campo inválido" sem explicar por quê ou como corrigir']},
-    {id:'b15',num:'B15',title:'Correção dos Erros',subtitle:'Meios para que o usuário corrija erros sem perder o trabalho já feito.',good:['Campo de erro já preenchido para editar e reenviar','Possibilidade de voltar e corrigir sem recomeçar'],bad:['Formulário reseta completamente após erro','Sem como voltar para a etapa anterior']},
-    {id:'b16',num:'B16',title:'Consistência',subtitle:'Elementos idênticos têm comportamentos e aparência idênticos em todo o sistema.',good:['Todos os botões primários com mesmo estilo','Mesmo padrão de data em todo o site'],bad:['Datas em formatos diferentes em páginas distintas','Botões com comportamentos inconsistentes']},
-    {id:'b17',num:'B17',title:'Significados dos Códigos e Denominações',subtitle:'Codificações usadas (cores, ícones, sons) são consistentes, significativas e claras.',good:['Verde = sucesso, vermelho = erro em todo o sistema','Ícones sempre com rótulo de texto'],bad:['Ícone sem texto de apoio','Vermelho usado para destaques que não são erros']},
-    {id:'b18',num:'B18',title:'Compatibilidade',subtitle:'Adequação entre a organização do sistema e as características dos usuários — tarefa, contexto e expectativas.',good:['Formulário de endereço no padrão brasileiro','Data no formato DD/MM/AAAA para público brasileiro'],bad:['Interface em inglês para público exclusivamente português','Fluxo que não reflete o processo real do usuário']}
-  ]},
-  wcag: { color:'#6af7c0', items:[
-    {id:'w1',num:'P·1A',title:'Perceptível — Alternativas em Texto',subtitle:'Todo conteúdo não-texto (imagens, botões-ícone, gráficos) tem uma alternativa em texto equivalente para leitores de tela.',good:['alt="Foto de produto: tênis azul"','Aria-label em botões que só têm ícone','Transcrição de vídeos e podcasts'],bad:['Tag img sem atributo alt','Botão com apenas ícone e sem label acessível']},
-    {id:'w2',num:'P·1B',title:'Perceptível — Contraste de Cores',subtitle:'Relação de contraste mínima de 4,5:1 para texto normal e 3:1 para texto grande (≥18pt ou ≥14pt negrito) — nível AA.',good:['Texto #333 em fundo #FFF = 12.6:1','Verificado com WebAIM Contrast Checker ou axe'],bad:['Texto #999 em fundo #FFF = 2.8:1 (reprovado)','Placeholder com contraste insuficiente']},
-    {id:'w3',num:'P·1C',title:'Perceptível — Redimensionamento de Texto',subtitle:'Texto ampliado até 200% sem perda de conteúdo ou funcionalidade — sem scroll horizontal.',good:['Site responsivo que adapta ao zoom do navegador','Fontes em em ou rem ao invés de px fixo'],bad:['Layout quebra ao aumentar fonte para 200%','Texto embutido em imagem que não escala']},
-    {id:'w4',num:'O·2A',title:'Operável — Acessibilidade pelo Teclado',subtitle:'Toda funcionalidade disponível via teclado (Tab, Enter, Esc, setas) sem requerer timing específico.',good:['Tab navega por todos os controles em ordem lógica','Modal fechado com Esc','Indicador de foco visível em todos os elementos'],bad:['Menu dropdown não acessível por teclado','Foco preso dentro de um componente (armadilha de teclado)','Outline de foco removido no CSS sem substituto']},
-    {id:'w5',num:'O·2B',title:'Operável — Tempo Suficiente',subtitle:'Usuários têm tempo suficiente para ler e usar o conteúdo — com opção de estender ou desativar limites de tempo.',good:['Aviso 2 min antes do timeout com opção de estender','Carousels com botões de pausa e controle manual'],bad:['Session timeout abrupto sem aviso','Conteúdo rotativo que não pode ser pausado']},
-    {id:'w6',num:'O·2C',title:'Operável — Convulsões e Reações Físicas',subtitle:'Não criar conteúdo que pisca mais de 3 vezes por segundo — risco de convulsões fotossensíveis.',good:['Animações suaves sem flashes','GIFs com taxa de quadros baixa'],bad:['GIFs ou vídeos com efeito estroboscópico','Animações de loading que piscam rapidamente']},
-    {id:'w7',num:'O·2D',title:'Operável — Navegável',subtitle:'Mecanismos para ajudar usuários a navegar, localizar conteúdo e saber onde estão na estrutura.',good:['Link "Pular para o conteúdo principal" (skip nav)','Breadcrumbs em páginas internas','Tag title única e descritiva em cada página','Headings em ordem lógica: H1 seguido de H2, depois H3'],bad:['Página sem tag title ou com título genérico "Home"','Headings fora de ordem (ex: H1 direto para H3, pulando H2)','Sem link skip nav, forçando Tab por todo o menu repetidamente']},
-    {id:'w8',num:'C·3A',title:'Compreensível — Idioma da Página',subtitle:'O idioma principal da página e trechos em outros idiomas estão identificados no código HTML.',good:['Atributo lang="pt-BR" declarado na tag html','Palavras em inglês marcadas com atributo lang="en"'],bad:['Tag html sem atributo lang','Leitor de tela pronunciando português com fonética inglesa por falta do atributo lang']},
-    {id:'w9',num:'C·3B',title:'Compreensível — Previsível',subtitle:'Páginas aparecem e operam de forma previsível — mudanças de contexto só ocorrem por solicitação explícita do usuário.',good:['Links com texto descritivo do destino (não só "clique aqui")','Formulário enviado apenas após clique explícito no botão Enviar','Foco do teclado não muda de elemento automaticamente sem ação do usuário'],bad:['"Clique aqui" como texto de link sem contexto','Caixa de seleção que navega para outra página automaticamente ao mudar a opção','Janela ou modal que abre sozinho interrompendo o fluxo do usuário']},
-    {id:'w10',num:'C·3C',title:'Compreensível — Assistência na Entrada de Dados',subtitle:'Ajuda para evitar e corrigir erros em formulários — com identificação clara e sugestões de correção.',good:['Labels permanentes visíveis acima do campo (não só placeholder)','Indicação clara de campos obrigatórios com asterisco e legenda','Sugestão de correção: "Você quis dizer nome@dominio.com?"'],bad:['Placeholder usado como único label (some ao digitar)','Sem indicação de campos obrigatórios','Mensagem de erro genérica sem sugestão de como corrigir']},
-    {id:'w11',num:'R·4A',title:'Robusto — Compatível com Tecnologias Assistivas',subtitle:'O conteúdo é interpretado corretamente por leitores de tela e outros recursos assistivos — usando HTML semântico e ARIA quando necessário.',good:['HTML semântico válido: usar button, nav, main, header corretamente','ARIA usado apenas quando necessário e de forma correta','Testado em leitor de tela como NVDA, VoiceOver ou TalkBack'],bad:['Usar div com onclick no lugar da tag button nativa','ARIA role incorreto, redundante ou em conflito com o HTML nativo','Componentes customizados (dropdowns, modais) sem suporte a teclado ou ARIA adequado']}
-  ]},
-  gestalt: { color:'#f76a8a', items:[
-    {id:'g1',num:'G01',title:'Proximidade',subtitle:'Elementos próximos são percebidos como relacionados. O espaço define agrupamentos sem precisar de bordas.',good:['Label imediatamente acima ou à esquerda do campo','Botões de ação agrupados próximos','Espaço generoso entre seções distintas'],bad:['Label longe do campo ao qual pertence','Botões relacionados distantes um do outro']},
-    {id:'g2',num:'G02',title:'Semelhança',subtitle:'Elementos com aparência similar são percebidos como parte do mesmo grupo ou com a mesma função.',good:['Todos os botões primários com mesmo estilo','Links sempre na mesma cor em todo o site'],bad:['Botões com estilos iguais executando ações diferentes','Links com cores variadas sem padrão']},
-    {id:'g3',num:'G03',title:'Continuidade',subtitle:'O olho tende a seguir linhas e curvas suaves, percebendo fluxo direcional natural.',good:['Breadcrumb com seta → direcional','Progress bar horizontal indicando avanço','Listas com fluxo visual consistente'],bad:['Navegação que quebra o fluxo visual esperado','Elementos posicionados contra o fluxo natural de leitura']},
-    {id:'g4',num:'G04',title:'Fechamento (Closure)',subtitle:'A mente completa formas incompletas. Ícones simples são reconhecidos mesmo parcialmente desenhados.',good:['Ícone de hambúrguer (≡) reconhecido como menu','Logo minimalista reconhecível','Indicador de carregamento circular parcial'],bad:['Ícones muito abstratos que não comunicam a função']},
-    {id:'g5',num:'G05',title:'Figura e Fundo',subtitle:'A mente separa elementos em "figura" (foco) e "fundo". O contraste define o que é principal.',good:['Modal com overlay escuro semitransparente','CTA em cor de destaque sobre fundo neutro','Conteúdo principal com contraste claro em relação ao fundo'],bad:['Imagem de fundo complexa que compete com o texto','Textura que dificulta a leitura']},
-    {id:'g6',num:'G06',title:'Hierarquia Visual',subtitle:'Elementos mais importantes devem ser visivelmente distintos — por tamanho, cor, contraste ou posição.',good:['H1 > H2 > H3 visivelmente distintos','CTA primário maior e mais colorido que os secundários','Preço em destaque na página de produto'],bad:['Todos os textos no mesmo tamanho','Botão principal visualmente igual ao cancelar']},
-    {id:'g7',num:'G07',title:'Região Comum',subtitle:'Elementos dentro de uma área delimitada (card, cor de fundo, borda) são percebidos como pertencentes ao mesmo grupo.',good:['Card com sombra agrupando título, imagem e botão','Sidebar com fundo de cor diferente','Seção com fundo distinto indicando conteúdo relacionado'],bad:['Conteúdo de grupos diferentes sem delimitação visual']},
-    {id:'g8',num:'G08',title:'Simetria e Ordem',subtitle:'A mente tende a perceber e preferir formas simétricas. Assimetria intencional chama atenção.',good:['Grid simétrico cria harmonia','Assimetria intencional para destacar o CTA','Alinhamento consistente em todos os elementos'],bad:['Desalinhamento acidental que parece erro','Layout desordenado sem intenção clara']}
-  ]}
-};
-
-const ratings = {};
-
-function buildCriteria(framework) {
-  const container = document.getElementById(`criteria-${framework}`);
-  const color = DATA[framework].color;
-  DATA[framework].items.forEach(item => {
-    ratings[item.id] = { score: null, na: false, notes: '' };
-    const div = document.createElement('div');
-    div.className = 'criterion';
-    div.id = `crit-${item.id}`;
-    const goodPills = item.good.map(g => `<span class="example-pill">✓ ${g}</span>`).join('');
-    const badPills  = item.bad.map(b  => `<span class="example-pill bad-pill">✗ ${b}</span>`).join('');
-    div.innerHTML = `
-      <div class="criterion-header" onclick="toggleCrit('${item.id}')">
-        <div class="criterion-num" style="color:${color};background:${color}22">${item.num}</div>
-        <div style="flex:1;min-width:0">
-          <div class="criterion-title">${item.title}</div>
-          <div class="criterion-subtitle">${item.subtitle}</div>
-        </div>
-        <div class="criterion-right">
-          <div class="criterion-score-preview" id="preview-${item.id}">—</div>
-          <div class="criterion-expand">▼</div>
-        </div>
-      </div>
-      <div class="criterion-body">
-        <div class="examples">${goodPills}${badPills}</div>
-        <div class="rating-row">
-          <span class="rating-label">Avalie:</span>
-          <div class="stars" id="stars-${item.id}">
-            ${[0,1,2,3,4].map(i=>`<div class="star" title="${['Péssimo','Ruim','Regular','Bom','Excelente'][i]}" onclick="setRating('${item.id}',${i})">${i}</div>`).join('')}
-          </div>
-          <div class="na-btn" id="na-${item.id}" onclick="setNA('${item.id}')">N/A</div>
-        </div>
-        <textarea class="notes-area" placeholder="Observações, problemas encontrados, evidências..." oninput="setNotes('${item.id}',this.value)"></textarea>
-      </div>`;
-    container.appendChild(div);
-  });
-}
-
-function toggleCrit(id) { document.getElementById(`crit-${id}`).classList.toggle('open'); }
-
-function updatePreview(id) {
-  const r = ratings[id], el = document.getElementById(`preview-${id}`);
-  if (r.na) { el.textContent='N/A'; el.style.color='var(--muted)'; return; }
-  if (r.score===null) { el.textContent='—'; el.style.color='var(--muted)'; return; }
-  const c=['var(--red)','#f97316','var(--yellow)','#a3e635','var(--green)'];
-  el.textContent = r.score+'/4'; el.style.color = c[r.score];
-}
-
-function setRating(id, score) {
-  ratings[id].score=score; ratings[id].na=false;
-  document.querySelectorAll(`#stars-${id} .star`).forEach((s,i)=>{ s.className='star'; if(i===score) s.classList.add(`sel-${score}`); });
-  document.getElementById(`na-${id}`).classList.remove('selected');
-  updatePreview(id);
-}
-
-function setNA(id) {
-  ratings[id].score=null; ratings[id].na=true;
-  document.querySelectorAll(`#stars-${id} .star`).forEach(s=>s.className='star');
-  document.getElementById(`na-${id}`).classList.add('selected');
-  updatePreview(id);
-}
-
-function setNotes(id,val) { ratings[id].notes=val; }
-
-function showTab(tab, el) {
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(`section-${tab}`).classList.add('active');
-  el.classList.add('active');
-  if(tab==='dashboard') buildDashboard();
-}
-
-function getFrameworkScore(fw) {
-  let sum=0, count=0;
-  DATA[fw].items.forEach(item => {
-    const r=ratings[item.id];
-    if(r && r.score!==null && !r.na){ sum+=r.score; count++; }
-  });
-  if(count===0) return null;
-  return { avg:sum/count, count, total:DATA[fw].items.length };
-}
-
-function scoreColor(avg) {
-  if(avg>=3.5) return 'var(--green)';
-  if(avg>=2.5) return '#a3e635';
-  if(avg>=1.5) return 'var(--yellow)';
-  if(avg>=0.5) return '#f97316';
-  return 'var(--red)';
-}
-
-function scoreBadge(score) {
-  if(score>=3.5) return ['badge-green','Excelente'];
-  if(score>=2.5) return ['badge-green','Bom'];
-  if(score>=1.5) return ['badge-yellow','Regular'];
-  if(score>=0.5) return ['badge-red','Ruim'];
-  return ['badge-red','Crítico'];
-}
-
-function buildDashboard() {
-  const names={nielsen:'🎯 Nielsen',bastien:'🔬 Bastien & Scapin',wcag:'♿ WCAG',gestalt:'👁️ Gestalt'};
-  const sc=document.getElementById('scorecards'); sc.innerHTML='';
-  let allSum=0, allCount=0;
-  const fwScores={};
-  ['nielsen','bastien','wcag','gestalt'].forEach(fw=>{
-    const s=getFrameworkScore(fw); fwScores[fw]=s;
-    if(s){ allSum+=s.avg; allCount++; }
-  });
-  const overall=allCount>0 ? allSum/allCount : null;
-
-  const oc=document.createElement('div'); oc.className='score-card'; oc.style.gridColumn='1/-1';
-  oc.innerHTML=`<div class="label">Pontuação Geral</div>
-    <div class="value" style="color:${overall!==null?scoreColor(overall):'var(--muted)'}">
-      ${overall!==null?(overall*25).toFixed(0)+'%':'—'}</div>
-    <div class="sub">${overall!==null?overall.toFixed(2)+' / 4.0':'Nenhum critério avaliado ainda'}</div>
-    <div class="score-bar"><div class="score-bar-fill" style="width:${overall!==null?overall*25:0}%;background:${overall!==null?scoreColor(overall):'var(--border)'}"></div></div>`;
-  sc.appendChild(oc);
-
-  ['nielsen','bastien','wcag','gestalt'].forEach(fw=>{
-    const s=fwScores[fw], card=document.createElement('div'); card.className='score-card';
-    card.innerHTML=`<div class="label">${names[fw]}</div>
-      <div class="value" style="color:${s?scoreColor(s.avg):'var(--muted)'}">
-        ${s?s.avg.toFixed(1):'—'}</div>
-      <div class="sub">${s?`${s.count} de ${s.total} avaliados`:'Não avaliado'}</div>
-      <div class="score-bar"><div class="score-bar-fill" style="width:${s?s.avg*25:0}%;background:${s?scoreColor(s.avg):'var(--border)'}"></div></div>`;
-    sc.appendChild(card);
-  });
-
-  const rb=document.getElementById('report-body'); rb.innerHTML='';
-  ['nielsen','bastien','wcag','gestalt'].forEach(fw=>{
-    const sec=document.createElement('div'); sec.className='report-section';
-    sec.innerHTML=`<h3>${names[fw]}</h3>`;
-    DATA[fw].items.forEach(item=>{
-      const r=ratings[item.id];
-      let badge='';
-      if(r.na) badge=`<span class="badge badge-gray">N/A</span>`;
-      else if(r.score===null) badge=`<span class="badge badge-gray">Não avaliado</span>`;
-      else { const [cls,lbl]=scoreBadge(r.score); badge=`<span class="badge ${cls}">${r.score}/4 · ${lbl}</span>`; }
-      const noteHtml=r.notes?`<div style="font-size:0.78rem;color:var(--muted);margin-top:0.2rem;font-style:italic">"${r.notes}"</div>`:'';
-      sec.innerHTML+=`<div class="report-item">
-        <div style="flex:1;min-width:0;padding-right:0.5rem">
-          <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--accent);margin-right:0.4rem">${item.num}</span>
-          <span class="name">${item.title}</span>${noteHtml}
-        </div>${badge}</div>`;
-    });
-    rb.appendChild(sec);
-  });
-}
-
-function exportCSV() {
-  const email=document.getElementById('evaluatorEmail').value||'';
-  const site=document.getElementById('projectName').value||'';
-  const date=new Date().toLocaleDateString('pt-BR');
-
-  const headers=['Data','E-mail Avaliador','Site Avaliado'];
-  const allItems=[];
-  ['nielsen','bastien','wcag','gestalt'].forEach(fw=>{
-    DATA[fw].items.forEach(item=>{
-      headers.push(`${item.num} - ${item.title}`);
-      headers.push(`${item.num} - Observações`);
-      allItems.push(item);
-    });
-  });
-  headers.push('Média Nielsen','Média Bastien & Scapin','Média WCAG','Média Gestalt','Média Geral');
-
-  const row=[date,email,site];
-  allItems.forEach(item=>{
-    const r=ratings[item.id];
-    row.push(r.na?'N/A':r.score!==null?r.score:'');
-    row.push(r.notes?r.notes.replace(/"/g,'""'):'');
-  });
-
-  let allSum=0, allCount=0;
-  ['nielsen','bastien','wcag','gestalt'].forEach(fw=>{
-    const s=getFrameworkScore(fw);
-    row.push(s?s.avg.toFixed(2):'');
-    if(s){ allSum+=s.avg; allCount++; }
-  });
-  row.push(allCount>0?(allSum/allCount).toFixed(2):'');
-
-  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
-  const csv=[headers.map(esc).join(','), row.map(esc).join(',')].join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const url1=URL.createObjectURL(blob);
-  const a1=document.createElement('a'); a1.href=url1; a1.style.display='none';
-  a1.download=`avaliacao_ux_${(site||'sem_site').replace(/[^a-z0-9]/gi,'_')}_${date.replace(/\//g,'-')}.csv`;
-  document.body.appendChild(a1); a1.click();
-  setTimeout(()=>{ document.body.removeChild(a1); URL.revokeObjectURL(url1); },200);
-}
-
-function exportTXT() {
-  const email=document.getElementById('evaluatorEmail').value||'Não informado';
-  const site=document.getElementById('projectName').value||'Não informado';
-  const date=new Date().toLocaleDateString('pt-BR');
-  const fwNames={nielsen:'HEURÍSTICAS DE NIELSEN',bastien:'CRITÉRIOS DE BASTIEN & SCAPIN',wcag:'ACESSIBILIDADE (WCAG 2.1)',gestalt:'PRINCÍPIOS DA GESTALT'};
-
-  let txt=`RELATÓRIO DE AVALIAÇÃO UX/IHC\n${'='.repeat(50)}\n`;
-  txt+=`Avaliador : ${email}\nSite      : ${site}\nData      : ${date}\n${'='.repeat(50)}\n`;
-
-  ['nielsen','bastien','wcag','gestalt'].forEach(fw=>{
-    txt+=`\n${fwNames[fw]}\n${'-'.repeat(40)}\n`;
-    DATA[fw].items.forEach(item=>{
-      const r=ratings[item.id];
-      const score=r.na?'N/A':r.score!==null?`${r.score}/4`:'Não avaliado';
-      txt+=`[${item.num}] ${item.title}: ${score}\n`;
-      if(r.notes) txt+=`     Obs: ${r.notes}\n`;
-    });
-  });
-
-  txt+=`\n${'='.repeat(50)}\nRESUMO DE PONTUAÇÕES\n${'-'.repeat(40)}\n`;
-  let allSum=0, allCount=0;
-  ['nielsen','bastien','wcag','gestalt'].forEach(fw=>{
-    const s=getFrameworkScore(fw);
-    txt+=`${fwNames[fw]}: ${s?s.avg.toFixed(2)+'/4.0':'Não avaliado'}\n`;
-    if(s){ allSum+=s.avg; allCount++; }
-  });
-  txt+=`\nMÉDIA GERAL: ${allCount>0?(allSum/allCount).toFixed(2)+'/4.0 ('+(((allSum/allCount)*25).toFixed(0))+'%)':'Não avaliado'}\n`;
-
-  const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
-  const url2=URL.createObjectURL(blob);
-  const a2=document.createElement('a'); a2.href=url2; a2.style.display='none';
-  a2.download=`relatorio_ux_${(site||'sem_site').replace(/[^a-z0-9]/gi,'_')}.txt`;
-  document.body.appendChild(a2); a2.click();
-  setTimeout(()=>{ document.body.removeChild(a2); URL.revokeObjectURL(url2); },200);
-}
-
-['nielsen','bastien','wcag','gestalt'].forEach(buildCriteria);
-</script>
-
-<footer>
-  <p>
-    <strong>Avaliador UX/IHC</strong> · Instrumento pedagógico para avaliação heurística de interfaces<br>
-    Desenvolvido por <strong>Profa. Dra. Danielle Pompeu Noronha Pontes</strong><br>
-    Universidade do Estado do Amazonas — UEA · Disciplina de Interação Humano-Computador
-  </p>
-  <p class="footer-disclaimer">
-    🤖 <strong>Disclaimer IA:</strong> Esta ferramenta foi desenvolvida com o auxílio do modelo de linguagem Claude (Anthropic, 2025). 
-    Os referenciais teóricos, critérios de avaliação e conteúdo científico foram revisados e validados pela autora. 
-    O uso de IA generativa na produção de ferramentas educacionais é declarado em conformidade com os princípios de 
-    transparência científica e integridade acadêmica.
-  </p>
-  <p style="margin-top:0.5rem; font-size:0.72rem; color:#3a3a55;">
-    Nielsen (1994) · Bastien &amp; Scapin (1993) · W3C WCAG 2.1 (2018) · Wertheimer (1938)
-  </p>
-</footer>
 </body>
 </html>
